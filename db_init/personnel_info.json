@@ -1,0 +1,74 @@
+[
+  {
+    "employee_id": "E001",
+    "name": "Ananya Sharma",
+    "aadhaar": "1234-5678-9012",
+    "pan": "ASDFP1234K",
+    "residence": {
+      "address": "221B Baker Street, Mumbai",
+      "city": "Mumbai",
+      "state": "Maharashtra",
+      "zip": "400001"
+    },
+    "contact": {
+      "phone": "+91-9876543210",
+      "email": "ananya.sharma@example.com"
+    },
+    "family": {
+      "marital_status": "Married",
+      "no_of_dependents": 3,
+      "dependents": [
+        {
+          "name": "Rahul Sharma",
+          "relation": "Spouse",
+          "age": 30
+        },
+        {
+          "name": "Arya Sharma",
+          "relation": "Daughter",
+          "age": 6
+        },
+        {
+          "name": "Daya Sharma",
+          "relation": "Father",
+          "age": 60
+        }
+      ]
+    },
+    "blood_group": "B+",
+    "dob": "1990-06-15",
+    "gender": "Female",
+    "emergency_contact": {
+      "name": "Rahul Sharma",
+      "phone": "+91-9876543211"
+    }
+  },
+  {
+    "employee_id": "E002",
+    "name": "Rohit Verma",
+    "aadhaar": "9876-5432-1098",
+    "pan": "BGHJK4567L",
+    "residence": {
+      "address": "50 MG Road, Delhi",
+      "city": "New Delhi",
+      "state": "Delhi",
+      "zip": "110001"
+    },
+    "contact": {
+      "phone": "+91-8888888888",
+      "email": "rohit.verma@example.com"
+    },
+    "family": {
+      "marital_status": "Single",
+      "no_of_dependents": 0,
+      "dependents": []
+    },
+    "blood_group": "O+",
+    "dob": "1988-12-10",
+    "gender": "Male",
+    "emergency_contact": {
+      "name": "Karan Verma",
+      "phone": "+91-9999999999"
+    }
+  }
+]

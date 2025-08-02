@@ -1,0 +1,48 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: hr_flask_web
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - postgres
+      - mongo
+    restart: always  # Optional but good for dev
+    command: gunicorn app:app --bind 0.0.0.0:5000
+
+  postgres:
+    image: cimg/postgres:17.5-postgis
+    container_name: hr_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hradmin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret123}
+      POSTGRES_DB: ${POSTGRES_DB:-hrdb}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db_init/init_employee.sql:/docker-entrypoint-initdb.d/init_employee.sql
+      - ./db_init/professional_info.sql:/docker-entrypoint-initdb.d/professional_info.sql
+
+  mongo:
+    image: corpusops/mongo:latest
+    container_name: hr_mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-example}
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  pgdata:
+  mongo_data:

@@ -1,0 +1,54 @@
+<!-- templates/stats.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Analytics</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Analytics Dashboard</h1>
+
+    <section>
+        <h2>Department-wise Employee Count</h2>
+        <ul>
+            {% for dept in department_stats %}
+                <li>{{ dept.department }}: {{ dept.total_employees }} employees</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section>
+        <h2>Average Salary by Department</h2>
+        <ul>
+            {% for avg in avg_salary_by_dept %}
+                <li>{{ avg.department }}: ₹{{ avg.avg_salary | round(2) }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section>
+        <h2>Low-Performing Employees</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Name</th>
+                    <th>Performance Rating</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for emp in low_performers %}
+                <tr>
+                    <td>{{ emp.employee_id }}</td>
+                    <td>{{ emp.full_name }}</td>
+                    <td>{{ emp.performance_rating }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <a href="/">Return Home</a>
+</body>
+</html>
