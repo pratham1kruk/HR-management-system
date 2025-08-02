@@ -1,23 +1,26 @@
 <!-- templates/employee_form.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>{{ 'Edit' if employee else 'Add' }} Employee</title>
+    <title>{{ employee and "Edit" or "Add" }} Employee</title>
 </head>
 <body>
-  <h1>{{ 'Edit' if employee else 'Add' }} Employee</h1>
-  <form method="POST">
-    {% if not employee %}
-      <label>Emp ID:</label><input type="text" name="emp_id" required><br>
-    {% endif %}
-    <label>Name:</label><input type="text" name="name" value="{{ employee.name if employee else '' }}" required><br>
-    <label>Adhaar:</label><input type="text" name="adhar" value="{{ employee.adhar if employee else '' }}" required><br>
-    <label>PAN:</label><input type="text" name="pan" value="{{ employee.pan if employee else '' }}"><br>
-    <label>Dependents:</label><input type="number" name="dependents" value="{{ employee.dependents if employee else 0 }}"><br>
-    <label>Residence:</label><input type="text" name="residence" value="{{ employee.residence if employee else '' }}"><br>
-    <button type="submit">💾 Save</button>
-  </form>
-  <a href="{{ url_for('employee.list_employees') }}">🔙 Back to Employee List</a>
+    <h2>{{ employee and "Edit" or "Add" }} Employee</h2>
+    <form method="POST">
+        First Name: <input type="text" name="first_name" value="{{ employee.first_name if employee else '' }}" required><br>
+        Last Name: <input type="text" name="last_name" value="{{ employee.last_name if employee else '' }}" required><br>
+        Date of Birth: <input type="date" name="dob" value="{{ employee.dob if employee else '' }}"><br>
+        Gender: 
+        <select name="gender">
+            <option value="Male" {% if employee and employee.gender == "Male" %}selected{% endif %}>Male</option>
+            <option value="Female" {% if employee and employee.gender == "Female" %}selected{% endif %}>Female</option>
+            <option value="Other" {% if employee and employee.gender == "Other" %}selected{% endif %}>Other</option>
+        </select><br>
+        Email: <input type="email" name="email" value="{{ employee.email if employee else '' }}"><br>
+        Phone: <input type="text" name="phone" value="{{ employee.phone if employee else '' }}"><br>
+        Hire Date: <input type="date" name="hire_date" value="{{ employee.hire_date if employee else '' }}"><br>
+        <input type="submit" value="Save">
+    </form>
+    <a href="{{ url_for('employee.list_employees') }}">Back</a>
 </body>
 </html>
