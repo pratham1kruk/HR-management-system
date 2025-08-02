@@ -14,7 +14,7 @@ services:
       - postgres
       - mongo
     restart: always  # Optional but good for dev
-    command: gunicorn app:app --bind 0.0.0.0:5000
+    command: gunicorn app:app --chdir /app --bind 0.0.0.0:5000
 
   postgres:
     image: cimg/postgres:17.5-postgis

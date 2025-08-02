@@ -21,4 +21,4 @@ HEALTHCHECK CMD curl --fail http://localhost:5000/ || exit 1
 COPY backend/ ./    
 # Copy Flask app
 COPY db_init/ /app/db_init
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:5000"]
+CMD ["gunicorn", "app:app", "--chdir", "/app", "--bind", "0.0.0.0:5000"]
