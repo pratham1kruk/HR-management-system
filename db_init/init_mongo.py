@@ -1,15 +1,12 @@
-# db_init/init_mongo.py
-import json
 from pymongo import MongoClient
+import json
 
-client = MongoClient("mongodb://localhost:27017/")
-db = client["hr_database"]
-collection = db["personnel_info"]
+client = MongoClient("mongodb://root:example@localhost:27017/")
+db = client["hrmongo"]
 
-with open("db_init/personnel_info_init.json") as f:
+with open("db_init/personnel_info.json") as f:
     data = json.load(f)
 
-# Drop existing if needed
-collection.drop()
-collection.insert_many(data)
-print("MongoDB seeded with personnel_info_init.json")
+# Insert into a collection named "employees_info"
+db.employees_info.insert_many(data)
+print("Inserted personnel_info.json into employees_info collection")
