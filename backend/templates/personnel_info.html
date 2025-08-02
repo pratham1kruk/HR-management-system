@@ -1,37 +1,53 @@
-<!-- templates/personnel_info.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Personnel Information</title>
+    <title>All Personnel Info</title>
+    <style>
+        table, th, td { border: 1px solid black; border-collapse: collapse; padding: 8px; }
+        th { background-color: #f2f2f2; }
+        a.button { padding: 4px 10px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 4px; }
+        a.button.delete { background-color: #DC3545; }
+    </style>
 </head>
 <body>
-    <h1>Personnel Information</h1>
-    <table border="1">
-        <thead>
+    <h1>All Personnel Information</h1>
+
+    <a class="button" href="{{ url_for('mongo.add_personnel') }}">➕ Add New Personnel</a>
+    <a class="button" href="{{ url_for('bloodgroup_counts') }}">📊 Blood Group Stats</a>
+    <br><br>
+
+    {% if personnel %}
+        <table>
             <tr>
                 <th>Name</th>
                 <th>Employee ID</th>
-                <th>Aadhar</th>
-                <th>PAN</th>
-                <th>Dependents</th>
-                <th>Residence</th>
+                <th>Gender</th>
+                <th>DOB</th>
+                <th>Blood Group</th>
+                <th>City</th>
+                <th>Phone</th>
                 <th>Actions</th>
             </tr>
-        </thead>
-        <tbody>
             {% for p in personnel %}
-            <tr>
-                <td>{{ p.name }}</td>
-                <td>{{ p.employee_id }}</td>
-                <td>{{ p.adhar }}</td>
-                <td>{{ p.pan }}</td>
-                <td>{{ p.num_dependents }}</td>
-                <td>{{ p.residence }}</td>
-                <td><a href="/mongo/personnel/{{ p._id }}">View/Edit</a></td>
-            </tr>
+                <tr>
+                    <td>{{ p.name }}</td>
+                    <td>{{ p.employee_id }}</td>
+                    <td>{{ p.gender }}</td>
+                    <td>{{ p.dob }}</td>
+                    <td>{{ p.blood_group }}</td>
+                    <td>{{ p.residence.city if p.residence else '' }}</td>
+                    <td>{{ p.contact.phone if p.contact else '' }}</td>
+                    <td>
+                        <a class="button" href="{{ url_for('mongo.update_personnel', id=p._id) }}">✏ Edit</a>
+                        <a class="button delete" href="{{ url_for('mongo.delete_personnel', id=p._id) }}">🗑 Delete</a>
+                        <a class="button" href="{{ url_for('mongo.view_personnel', id=p._id) }}">👁 View JSON</a>
+                    </td>
+                </tr>
             {% endfor %}
-        </tbody>
-    </table>
+        </table>
+    {% else %}
+        <p>No personnel records found.</p>
+    {% endif %}
 </body>
 </html>
