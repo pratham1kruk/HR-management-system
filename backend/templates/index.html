@@ -6,11 +6,23 @@
 </head>
 <body>
     <h1>Welcome to the HR Management System</h1>
+
     <nav>
         <ul>
-            <li><a href="{{ url_for('employee.list_employees') }}">View All Employees</a></li>
-            <li><a href="{{ url_for('employee.add_employee') }}">Add New Employee</a></li>
-            <li><a href="{{ url_for('analytics.analytics_dashboard') }}">Analytics Dashboard</a></li>
+            <!-- Employee (PostgreSQL) routes -->
+            <li><a href="/employees">View All Employees</a></li>
+            <li><a href="/employee/add">Add New Employee</a></li>
+
+            <!-- Analytics Dashboard -->
+            <li><a href="/analytics/avg-salary">Analytics: Average Salary</a></li>
+            <li><a href="/analytics/top-performers">Analytics: Top Performers</a></li>
+            <li><a href="/analytics/recent-hires">Analytics: Recent Hires</a></li>
+            <li><a href="/analytics/missing-pan">Analytics: Missing PAN (MongoDB)</a></li>
+            <li><a href="/analytics/qualification-count">Analytics: Qualification Count (MongoDB)</a></li>
+
+            <!-- Personnel (MongoDB) routes -->
+            <li><a href="/personnel">View Personnel Info</a></li>
+            <li><a href="/personnel/add">Add New Personnel</a></li>
         </ul>
     </nav>
 </body>
