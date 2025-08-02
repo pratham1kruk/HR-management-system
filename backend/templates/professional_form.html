@@ -1,22 +1,25 @@
 <!-- templates/professional_form.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>{{ 'Edit' if prof else 'Add' }} Professional Info</title>
+    <title>{{ professional and "Edit" or "Add" }} Professional Info</title>
 </head>
 <body>
-  <h1>{{ 'Edit' if prof else 'Add' }} Professional Info for {{ employee.name }}</h1>
-  <form method="POST">
-    <label>Department:</label><input type="text" name="department" value="{{ prof.department if prof else '' }}"><br>
-    <label>Designation:</label><input type="text" name="designation" value="{{ prof.designation if prof else '' }}"><br>
-    <label>Experience:</label><input type="number" name="experience" value="{{ prof.experience if prof else 0 }}"><br>
-    <label>Salary:</label><input type="number" step="0.01" name="salary" value="{{ prof.salary if prof else '' }}"><br>
-    <label>Last Increment:</label><input type="number" step="0.01" name="last_increment" value="{{ prof.last_increment if prof else 0 }}"><br>
-    <label>Skills (comma separated):</label><input type="text" name="skills" value="{{ prof.skills|join(',') if prof and prof.skills else '' }}"><br>
-    <label>Performance Rating (1-5):</label><input type="number" min="1" max="5" name="performance_rating" value="{{ prof.performance_rating if prof else 3 }}"><br>
-    <button type="submit">💾 Save</button>
-  </form>
-  <a href="{{ url_for('employee.list_employees') }}">🔙 Back</a>
+    <h2>{{ professional and "Edit" or "Add" }} Professional Info for {{ employee.first_name }} {{ employee.last_name }}</h2>
+    <form method="POST">
+        Department: <input type="text" name="department" value="{{ professional.department if professional else '' }}"><br>
+        Designation: <input type="text" name="designation" value="{{ professional.designation if professional else '' }}"><br>
+        Salary: <input type="number" step="0.01" name="salary" value="{{ professional.salary if professional else '' }}"><br>
+        Last Review Date: <input type="date" name="last_review_date" value="{{ professional.last_review_date if professional else '' }}"><br>
+        <input type="submit" value="Save">
+    </form>
+
+    {% if professional %}
+    <form method="POST" action="{{ url_for('employee.delete_professional', emp_id=employee.emp_id) }}">
+        <button type="submit">Delete Professional Info</button>
+    </form>
+    {% endif %}
+
+    <a href="{{ url_for('employee.list_employees') }}">Back</a>
 </body>
 </html>
