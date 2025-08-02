@@ -1,13 +1,13 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for
 from bson.objectid import ObjectId
-from models.mongo_models import personnel_collection
+from app import mongo  # use this instead of models.mongo_models
 
 mongo_bp = Blueprint('mongo', __name__, url_prefix='/personnel')
 
 # Show all personnel info from MongoDB
 @mongo_bp.route('/')
 def list_personnel():
-    personnel = list(personnel_collection.find())
+    personnel = list(mongo.db.employees_info.find())
     return render_template('personnel_info.html', personnel=personnel)
 
 # Show form to add new personnel info
@@ -21,14 +21,14 @@ def add_personnel():
             "emergency_contact": request.form.get("emergency_contact"),
             "blood_group": request.form.get("blood_group")
         }
-        personnel_collection.insert_one(data)
+        mongo.db.employees_info.insert_one(data)
         return redirect(url_for('mongo.list_personnel'))
     return render_template('personnel_form.html')
 
 # Update personnel info by _id
 @mongo_bp.route('/update/<id>', methods=['GET', 'POST'])
 def update_personnel(id):
-    existing = personnel_collection.find_one({"_id": ObjectId(id)})
+    existing = mongo.db.employees_info.find_one({"_id": ObjectId(id)})
     if not existing:
         return "Not found", 404
 
@@ -40,7 +40,7 @@ def update_personnel(id):
             "emergency_contact": request.form.get("emergency_contact"),
             "blood_group": request.form.get("blood_group")
         }
-        personnel_collection.update_one({"_id": ObjectId(id)}, {"$set": new_data})
+        mongo.db.employees_info.update_one({"_id": ObjectId(id)}, {"$set": new_data})
         return redirect(url_for('mongo.list_personnel'))
     
     return render_template('personnel_form.html', data=existing)
@@ -48,13 +48,13 @@ def update_personnel(id):
 # Delete personnel record
 @mongo_bp.route('/delete/<id>')
 def delete_personnel(id):
-    personnel_collection.delete_one({"_id": ObjectId(id)})
+    mongo.db.employees_info.delete_one({"_id": ObjectId(id)})
     return redirect(url_for('mongo.list_personnel'))
 
 # Get a single personnel record as JSON
 @mongo_bp.route('/<id>')
 def view_personnel(id):
-    person = personnel_collection.find_one({"_id": ObjectId(id)})
+    person = mongo.db.employees_info.find_one({"_id": ObjectId(id)})
     if not person:
         return jsonify({"error": "Not found"}), 404
     person["_id"] = str(person["_id"])  # Convert ObjectId to string
