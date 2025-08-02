@@ -2,37 +2,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Employee List</title>
+  <meta charset="UTF-8">
+  <title>Employee Directory</title>
 </head>
 <body>
-    <h1>All Employees</h1>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Full Name</th>
-                <th>Department</th>
-                <th>Position</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for emp in employees %}
-            <tr>
-                <td>{{ emp.id }}</td>
-                <td>{{ emp.full_name }}</td>
-                <td>{{ emp.department }}</td>
-                <td>{{ emp.position }}</td>
-                <td>
-                    <a href="/employee/{{ emp.id }}">View</a>
-                    <a href="/employee/{{ emp.id }}/edit">Edit</a>
-                    <a href="/employee/{{ emp.id }}/delete">Delete</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+  <h1>All Employees</h1>
+  <a href="{{ url_for('employee.add_employee') }}">➕ Add New Employee</a>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Emp ID</th>
+        <th>Name</th>
+        <th>Adhaar</th>
+        <th>PAN</th>
+        <th>Dependents</th>
+        <th>Residence</th>
+        <th>Department</th>
+        <th>Designation</th>
+        <th>Experience</th>
+        <th>Salary</th>
+        <th>Skills</th>
+        <th>Rating</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for emp in employees %}
+        <tr>
+          <td>{{ emp.emp_id }}</td>
+          <td>{{ emp.name }}</td>
+          <td>{{ emp.adhar }}</td>
+          <td>{{ emp.pan }}</td>
+          <td>{{ emp.dependents }}</td>
+          <td>{{ emp.residence }}</td>
+          <td>{{ emp.professional.department if emp.professional else 'N/A' }}</td>
+          <td>{{ emp.professional.designation if emp.professional else 'N/A' }}</td>
+          <td>{{ emp.professional.experience if emp.professional else 'N/A' }}</td>
+          <td>{{ emp.professional.salary if emp.professional else 'N/A' }}</td>
+          <td>{{ emp.professional.skills|join(', ') if emp.professional and emp.professional.skills else 'N/A' }}</td>
+          <td>{{ emp.professional.performance_rating if emp.professional else 'N/A' }}</td>
+          <td>
+            <a href="{{ url_for('employee.edit_employee', emp_id=emp.emp_id) }}">✏️ Edit</a> |
+            <form action="{{ url_for('employee.delete_employee', emp_id=emp.emp_id) }}" method="post" style="display:inline;">
+              <button type="submit">🗑 Delete</button>
+            </form> |
+            <a href="{{ url_for('employee.edit_professional', emp_id=emp.emp_id) }}">
+              {{ '✏️ Edit Prof Info' if emp.professional else '➕ Add Prof Info' }}
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </body>
 </html>
-
