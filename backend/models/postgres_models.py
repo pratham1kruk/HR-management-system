@@ -5,7 +5,7 @@ db = SQLAlchemy()
 
 class Employee(db.Model):
     __tablename__ = 'employee'
-    
+
     emp_id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
@@ -14,8 +14,8 @@ class Employee(db.Model):
     hire_date = db.Column(db.Date, default=datetime.utcnow)
     designation = db.Column(db.String(100))
     department = db.Column(db.String(100))
-    current_salary = db.Column(db.Numeric(10,2))
-    previous_salary = db.Column(db.Numeric(10,2))
+    current_salary = db.Column(db.Numeric(10, 2))
+    previous_salary = db.Column(db.Numeric(10, 2))
 
     professional = db.relationship("ProfessionalInfo", backref="employee", uselist=False)
 
