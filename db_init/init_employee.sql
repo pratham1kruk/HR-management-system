@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS employee (
     dob DATE,
     gender VARCHAR(10),
     hire_date DATE,
+    email VARCHAR(120) UNIQUE,
+    phone VARCHAR(15),
     designation VARCHAR(100),
     department VARCHAR(100),
     current_salary NUMERIC(10,2),
