@@ -1,5 +1,6 @@
 from flask import Blueprint, request, render_template, redirect, url_for, flash
 from models.postgres_models import db, Employee, ProfessionalInfo
+from datetime import datetime
 
 employee_bp = Blueprint("employee", __name__)
 
@@ -18,12 +19,13 @@ def list_employees():
 def add_employee():
     if request.method == "POST":
         new_emp = Employee(
-            emp_id=request.form["emp_id"],
-            name=request.form["name"],
-            adhar=request.form["adhar"],
-            pan=request.form["pan"],
-            dependents=int(request.form["dependents"]),
-            residence=request.form["residence"]
+            first_name=request.form["first_name"],
+            last_name=request.form["last_name"],
+            dob=request.form["dob"],
+            gender=request.form["gender"],
+            email=request.form["email"],
+            phone=request.form["phone"],
+            hire_date=datetime.strptime(request.form["hire_date"], "%Y-%m-%d"),
         )
         db.session.add(new_emp)
         db.session.commit()
@@ -37,11 +39,13 @@ def add_employee():
 def edit_employee(emp_id):
     emp = Employee.query.get_or_404(emp_id)
     if request.method == "POST":
-        emp.name = request.form["name"]
-        emp.adhar = request.form["adhar"]
-        emp.pan = request.form["pan"]
-        emp.dependents = int(request.form["dependents"])
-        emp.residence = request.form["residence"]
+        emp.first_name = request.form["first_name"]
+        emp.last_name = request.form["last_name"]
+        emp.dob = request.form["dob"]
+        emp.gender = request.form["gender"]
+        emp.email = request.form["email"]
+        emp.phone = request.form["phone"]
+        emp.hire_date = datetime.strptime(request.form["hire_date"], "%Y-%m-%d")
         db.session.commit()
         return redirect(url_for("employee.list_employees"))
     return render_template("employee_form.html", employee=emp)
@@ -62,29 +66,23 @@ def delete_employee(emp_id):
 @employee_bp.route("/<int:emp_id>/professional", methods=["GET", "POST"])
 def add_update_professional(emp_id):
     emp = Employee.query.get_or_404(emp_id)
-    prof = ProfessionalInfo.query.get(emp_id)
+    prof = ProfessionalInfo.query.filter_by(emp_id=emp_id).first()
 
     if request.method == "POST":
         if prof:
             # Update existing
             prof.department = request.form["department"]
             prof.designation = request.form["designation"]
-            prof.experience = int(request.form["experience"])
             prof.salary = float(request.form["salary"])
-            prof.last_increment = float(request.form["last_increment"])
-            prof.skills = request.form.get("skills").split(',')
-            prof.performance_rating = int(request.form["performance_rating"])
+            prof.last_review_date = datetime.strptime(request.form["last_review_date"], "%Y-%m-%d")
         else:
             # Add new
             prof = ProfessionalInfo(
                 emp_id=emp_id,
                 department=request.form["department"],
                 designation=request.form["designation"],
-                experience=int(request.form["experience"]),
                 salary=float(request.form["salary"]),
-                last_increment=float(request.form["last_increment"]),
-                skills=request.form.get("skills").split(','),
-                performance_rating=int(request.form["performance_rating"])
+                last_review_date=datetime.strptime(request.form["last_review_date"], "%Y-%m-%d")
             )
             db.session.add(prof)
         db.session.commit()
@@ -97,8 +95,9 @@ def add_update_professional(emp_id):
 # ─────────────────────────────
 @employee_bp.route("/<int:emp_id>/professional/delete", methods=["POST"])
 def delete_professional(emp_id):
-    prof = ProfessionalInfo.query.get_or_404(emp_id)
-    db.session.delete(prof)
-    db.session.commit()
-    flash("Professional Info deleted.")
+    prof = ProfessionalInfo.query.filter_by(emp_id=emp_id).first()
+    if prof:
+        db.session.delete(prof)
+        db.session.commit()
+        flash("Professional Info deleted.")
     return redirect(url_for("employee.list_employees"))
