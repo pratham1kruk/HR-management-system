@@ -1,0 +1,22 @@
+<!-- templates/professional_form.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ 'Edit' if prof else 'Add' }} Professional Info</title>
+</head>
+<body>
+  <h1>{{ 'Edit' if prof else 'Add' }} Professional Info for {{ employee.name }}</h1>
+  <form method="POST">
+    <label>Department:</label><input type="text" name="department" value="{{ prof.department if prof else '' }}"><br>
+    <label>Designation:</label><input type="text" name="designation" value="{{ prof.designation if prof else '' }}"><br>
+    <label>Experience:</label><input type="number" name="experience" value="{{ prof.experience if prof else 0 }}"><br>
+    <label>Salary:</label><input type="number" step="0.01" name="salary" value="{{ prof.salary if prof else '' }}"><br>
+    <label>Last Increment:</label><input type="number" step="0.01" name="last_increment" value="{{ prof.last_increment if prof else 0 }}"><br>
+    <label>Skills (comma separated):</label><input type="text" name="skills" value="{{ prof.skills|join(',') if prof and prof.skills else '' }}"><br>
+    <label>Performance Rating (1-5):</label><input type="number" min="1" max="5" name="performance_rating" value="{{ prof.performance_rating if prof else 3 }}"><br>
+    <button type="submit">💾 Save</button>
+  </form>
+  <a href="{{ url_for('employee.list_employees') }}">🔙 Back</a>
+</body>
+</html>
