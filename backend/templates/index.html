@@ -1,4 +1,3 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,11 +8,10 @@
     <h1>Welcome to the HR Management System</h1>
     <nav>
         <ul>
-            <li><a href="/employees">View All Employees</a></li>
-            <li><a href="/employee/new">Add New Employee</a></li>
-            <li><a href="/analytics">Analytics Dashboard</a></li>
+            <li><a href="{{ url_for('employee.list_employees') }}">View All Employees</a></li>
+            <li><a href="{{ url_for('employee.add_employee') }}">Add New Employee</a></li>
+            <li><a href="{{ url_for('analytics.analytics_dashboard') }}">Analytics Dashboard</a></li>
         </ul>
     </nav>
 </body>
 </html>
-
