@@ -1,5 +1,5 @@
 from flask import Blueprint, request, render_template, redirect, url_for
-from backend.models.postgres_models import db, Employee, ProfessionalInfo
+from models.postgres_models import db, Employee, ProfessionalInfo
 
 employee_bp = Blueprint("employee_bp", __name__)
 
