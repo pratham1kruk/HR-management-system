@@ -8,19 +8,22 @@ import os
 # Load env vars
 load_dotenv()
 
+# Import Config class
+from config import Config
+
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
 
-# Load config
-app.config.from_pyfile('config.py')
+# Load configuration
+app.config.from_object(Config)
 
 # SQLAlchemy init
 db = SQLAlchemy(app)
 
 # PyMongo init
+app.config["MONGO_URI"] = Config.MONGO_URI
 mongo = PyMongo(app)
-app.config['MONGO'] = mongo  # So current_app.config['MONGO'] works in mongo_models
 
 # --- Import Blueprints ---
 from routes.employee_routes import employee_bp

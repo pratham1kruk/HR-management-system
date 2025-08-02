@@ -14,6 +14,9 @@ COPY backend/requirements.txt .
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
+HEALTHCHECK CMD curl --fail http://localhost:5000/ || exit 1
+
+
 # Copy project files
 COPY backend/ ./    
 # Copy Flask app
