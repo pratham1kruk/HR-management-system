@@ -5,41 +5,45 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 
-# Load env vars
+# Load environment variables from .env
 load_dotenv()
 
-# Import Config class
-from config import Config
-
-# Initialize Flask app
+# Flask App Init
 app = Flask(__name__)
 CORS(app)
 
-# Load configuration
+# Load config from config.py
+from config import Config
 app.config.from_object(Config)
 
-# SQLAlchemy init
+# Initialize SQLAlchemy
 db = SQLAlchemy(app)
 
-# PyMongo init
+# Initialize MongoDB
 app.config["MONGO_URI"] = Config.MONGO_URI
 mongo = PyMongo(app)
 
-# --- Import Blueprints ---
+# Make db and mongo available across modules
+from models import postgres_models
+postgres_models.db = db
+
+from models import mongo_models
+mongo_models.mongo = mongo
+
+# Import and Register Blueprints
 from routes.employee_routes import employee_bp
 from routes.mongo_routes import mongo_bp
 from routes.analytics_routes import analytics_bp
 
-# Register Blueprints
 app.register_blueprint(employee_bp, url_prefix="/employees")
-app.register_blueprint(mongo_bp, url_prefix="/mongo")
+app.register_blueprint(mongo_bp, url_prefix="/personnel")  # Match route in mongo_routes
 app.register_blueprint(analytics_bp, url_prefix="/analytics")
 
-# --- Home Route ---
+# Home Page
 @app.route("/")
 def home():
     return render_template("index.html")
 
-# --- Run App ---
+# Run App
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host="0.0.0.0")
