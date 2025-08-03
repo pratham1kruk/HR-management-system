@@ -1,37 +1,14 @@
-<h2>{{ 'Edit' if employee else 'Add' }} Employee</h2>
+<!-- templates/employee_form.html -->
 <form method="POST">
-    <label>First Name:</label>
-    <input type="text" name="first_name" value="{{ employee.first_name if employee else '' }}"><br>
-
-    <label>Last Name:</label>
-    <input type="text" name="last_name" value="{{ employee.last_name if employee else '' }}"><br>
-
-    <label>Date of Birth:</label>
-    <input type="date" name="dob" value="{{ employee.dob if employee else '' }}"><br>
-
-    <label>Gender:</label>
-    <select name="gender">
-        <option value="Male" {% if employee and employee.gender == 'Male' %}selected{% endif %}>Male</option>
-        <option value="Female" {% if employee and employee.gender == 'Female' %}selected{% endif %}>Female</option>
-        <option value="Other" {% if employee and employee.gender == 'Other' %}selected{% endif %}>Other</option>
-    </select><br>
-
-    <label>Hire Date:</label>
-    <input type="date" name="hire_date" value="{{ employee.hire_date if employee else '' }}"><br>
-
-    <label>Designation:</label>
-    <input type="text" name="designation" value="{{ employee.designation if employee else '' }}"><br>
-
-    <label>Department:</label>
-    <input type="text" name="department" value="{{ employee.department if employee else '' }}"><br>
-
-    <label>Current Salary:</label>
-    <input type="number" step="0.01" name="current_salary" value="{{ employee.current_salary if employee else '' }}"><br>
-
-    <label>Previous Salary:</label>
-    <input type="number" step="0.01" name="previous_salary" value="{{ employee.previous_salary if employee else '' }}"><br>
-
-    <button type="submit">Save</button>
+  <input name="first_name" placeholder="First Name" required>
+  <input name="last_name" placeholder="Last Name" required>
+  <input type="date" name="dob" placeholder="Date of Birth">
+  <select name="gender">
+    <option value="Male">Male</option>
+    <option value="Female">Female</option>
+  </select>
+  <input type="date" name="hire_date" placeholder="Hire Date">
+  <input name="email" placeholder="Email">
+  <input name="phone" placeholder="Phone">
+  <button type="submit">Save</button>
 </form>
-
-<a href="{{ url_for('employee.list_employees') }}">Back</a>

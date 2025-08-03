@@ -1,20 +1,15 @@
+# ────── employee_routes.py ──────
 from flask import Blueprint, request, render_template, redirect, url_for, flash
 from models.postgres_models import db, Employee, ProfessionalInfo
 from datetime import datetime
 
-employee_bp = Blueprint("employee", __name__)
+employee_bp = Blueprint("employee", __name__, url_prefix="/employees")
 
-# ─────────────────────────────
-# VIEW: List all employees with professional info
-# ─────────────────────────────
 @employee_bp.route("/")
 def list_employees():
     employees = db.session.query(Employee).outerjoin(ProfessionalInfo).all()
     return render_template("employee_list.html", employees=employees)
 
-# ─────────────────────────────
-# FORM: Add new employee (basic info only)
-# ─────────────────────────────
 @employee_bp.route("/new", methods=["GET", "POST"])
 def add_employee():
     if request.method == "POST":
@@ -32,9 +27,6 @@ def add_employee():
         return redirect(url_for("employee.list_employees"))
     return render_template("employee_form.html")
 
-# ─────────────────────────────
-# FORM: Update employee basic info
-# ─────────────────────────────
 @employee_bp.route("/edit/<int:emp_id>", methods=["GET", "POST"])
 def edit_employee(emp_id):
     emp = Employee.query.get_or_404(emp_id)
@@ -50,9 +42,6 @@ def edit_employee(emp_id):
         return redirect(url_for("employee.list_employees"))
     return render_template("employee_form.html", employee=emp)
 
-# ─────────────────────────────
-# DELETE: Employee
-# ─────────────────────────────
 @employee_bp.route("/delete/<int:emp_id>", methods=["POST"])
 def delete_employee(emp_id):
     emp = Employee.query.get_or_404(emp_id)
@@ -60,9 +49,6 @@ def delete_employee(emp_id):
     db.session.commit()
     return redirect(url_for("employee.list_employees"))
 
-# ─────────────────────────────
-# ADD/UPDATE Professional Info
-# ─────────────────────────────
 @employee_bp.route("/<int:emp_id>/professional", methods=["GET", "POST"])
 def add_update_professional(emp_id):
     emp = Employee.query.get_or_404(emp_id)
@@ -70,19 +56,17 @@ def add_update_professional(emp_id):
 
     if request.method == "POST":
         if prof:
-            # Update existing
             prof.department = request.form["department"]
             prof.designation = request.form["designation"]
-            prof.salary = float(request.form["salary"])
-            prof.last_review_date = datetime.strptime(request.form["last_review_date"], "%Y-%m-%d")
+            prof.current_salary = float(request.form["current_salary"])
+            prof.previous_salary = float(request.form["previous_salary"])
         else:
-            # Add new
             prof = ProfessionalInfo(
                 emp_id=emp_id,
                 department=request.form["department"],
                 designation=request.form["designation"],
-                salary=float(request.form["salary"]),
-                last_review_date=datetime.strptime(request.form["last_review_date"], "%Y-%m-%d")
+                current_salary=float(request.form["current_salary"]),
+                previous_salary=float(request.form["previous_salary"])
             )
             db.session.add(prof)
         db.session.commit()
@@ -90,9 +74,6 @@ def add_update_professional(emp_id):
 
     return render_template("professional_form.html", employee=emp, professional=prof)
 
-# ─────────────────────────────
-# DELETE: Professional Info
-# ─────────────────────────────
 @employee_bp.route("/<int:emp_id>/professional/delete", methods=["POST"])
 def delete_professional(emp_id):
     prof = ProfessionalInfo.query.filter_by(emp_id=emp_id).first()
