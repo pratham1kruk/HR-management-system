@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Management</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 30px;
+        }
+        h1 {
+            font-size: 28px;
+        }
+        .menu {
+            margin-top: 30px;
+        }
+        .menu button {
+            display: block;
+            margin: 12px 0;
+            padding: 10px 20px;
+            font-size: 16px;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Employee Management Dashboard</h1>
+    <div class="menu">
+        <form action="{{ url_for('employee.add_employee') }}">
+            <button type="submit">➕ Add Basic Employee Details</button>
+        </form>
+        <form action="{{ url_for('employee.list_employees') }}">
+            <button type="submit">🧑‍💼 Add or Edit Professional Info</button>
+        </form>
+        <form action="{{ url_for('employee.list_employees') }}">
+            <button type="submit">📋 View & Manage All Employees</button>
+        </form>
+    </div>
+</body>
+</html>
