@@ -1,23 +1,38 @@
-<!-- templates/employee_list.html -->
-<h2>Employees</h2>
-<a href="{{ url_for('employee.add_employee') }}">Add Employee</a>
-<table>
-  <tr>
-    <th>Name</th><th>Email</th><th>Phone</th><th>Department</th><th>Actions</th>
-  </tr>
-  {% for emp in employees %}
-  <tr>
-    <td>{{ emp.first_name }} {{ emp.last_name }}</td>
-    <td>{{ emp.email }}</td>
-    <td>{{ emp.phone }}</td>
-    <td>{{ emp.professional.department if emp.professional else 'N/A' }}</td>
-    <td>
-      <a href="{{ url_for('employee.edit_employee', emp_id=emp.emp_id) }}">Edit</a> |
-      <a href="{{ url_for('employee.add_update_professional', emp_id=emp.emp_id) }}">Professional Info</a> |
-      <form method="POST" action="{{ url_for('employee.delete_employee', emp_id=emp.emp_id) }}" style="display:inline;">
-        <button type="submit">Delete</button>
-      </form>
-    </td>
-  </tr>
-  {% endfor %}
-</table>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employees</title>
+</head>
+<body>
+    <h1>Employees</h1>
+    <a href="{{ url_for('employee.employee_dashboard') }}">← Back to Dashboard</a><br><br>
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Department</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for emp in employees %}
+            <tr>
+                <td>{{ emp.first_name }} {{ emp.last_name }}</td>
+                <td>{{ emp.email or '-' }}</td>
+                <td>{{ emp.phone or '-' }}</td>
+                <td>{{ emp.professional.department if emp.professional else '-' }}</td>
+                <td>
+                    <a href="{{ url_for('employee.edit_employee', emp_id=emp.emp_id) }}">Edit</a> |
+                    <a href="{{ url_for('employee.add_update_professional', emp_id=emp.emp_id) }}">Professional Info</a> |
+                    <form action="{{ url_for('employee.delete_employee', emp_id=emp.emp_id) }}" method="POST" style="display:inline;">
+                        <button type="submit" onclick="return confirm('Delete this employee?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

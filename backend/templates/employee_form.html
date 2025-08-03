@@ -1,14 +1,39 @@
-<!-- templates/employee_form.html -->
-<form method="POST">
-  <input name="first_name" placeholder="First Name" required>
-  <input name="last_name" placeholder="Last Name" required>
-  <input type="date" name="dob" placeholder="Date of Birth">
-  <select name="gender">
-    <option value="Male">Male</option>
-    <option value="Female">Female</option>
-  </select>
-  <input type="date" name="hire_date" placeholder="Hire Date">
-  <input name="email" placeholder="Email">
-  <input name="phone" placeholder="Phone">
-  <button type="submit">Save</button>
-</form>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Employee</title>
+</head>
+<body>
+    <h1>Add Employee</h1>
+    <form method="POST">
+        <label>First Name:</label><br>
+        <input type="text" name="first_name" required><br><br>
+
+        <label>Last Name:</label><br>
+        <input type="text" name="last_name" required><br><br>
+
+        <label>Date of Birth:</label><br>
+        <input type="date" name="dob"><br><br>
+
+        <label>Gender:</label><br>
+        <select name="gender">
+            <option value="">-- Select --</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select><br><br>
+
+        <label>Email:</label><br>
+        <input type="email" name="email"><br><br>
+
+        <label>Phone:</label><br>
+        <input type="text" name="phone"><br><br>
+
+        <label>Hire Date:</label><br>
+        <input type="date" name="hire_date"><br><br>
+
+        <button type="submit">Save</button>
+    </form>
+    <br>
+    <a href="{{ url_for('employee.employee_dashboard') }}">Back</a>
+</body>
+</html>
