@@ -1,25 +1,8 @@
 <!-- templates/professional_form.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ professional and "Edit" or "Add" }} Professional Info</title>
-</head>
-<body>
-    <h2>{{ professional and "Edit" or "Add" }} Professional Info for {{ employee.first_name }} {{ employee.last_name }}</h2>
-    <form method="POST">
-        Department: <input type="text" name="department" value="{{ professional.department if professional else '' }}"><br>
-        Designation: <input type="text" name="designation" value="{{ professional.designation if professional else '' }}"><br>
-        Salary: <input type="number" step="0.01" name="salary" value="{{ professional.salary if professional else '' }}"><br>
-        Last Review Date: <input type="date" name="last_review_date" value="{{ professional.last_review_date if professional else '' }}"><br>
-        <input type="submit" value="Save">
-    </form>
-
-    {% if professional %}
-    <form method="POST" action="{{ url_for('employee.delete_professional', emp_id=employee.emp_id) }}">
-        <button type="submit">Delete Professional Info</button>
-    </form>
-    {% endif %}
-
-    <a href="{{ url_for('employee.list_employees') }}">Back</a>
-</body>
-</html>
+<form method="POST">
+  <input name="designation" placeholder="Designation" value="{{ professional.designation if professional else '' }}">
+  <input name="department" placeholder="Department" value="{{ professional.department if professional else '' }}">
+  <input name="current_salary" placeholder="Current Salary" type="number" step="0.01" value="{{ professional.current_salary if professional else '' }}">
+  <input name="previous_salary" placeholder="Previous Salary" type="number" step="0.01" value="{{ professional.previous_salary if professional else '' }}">
+  <button type="submit">Save Professional Info</button>
+</form>

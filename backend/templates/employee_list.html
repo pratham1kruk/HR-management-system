@@ -1,51 +1,23 @@
 <!-- templates/employee_list.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Employees</title>
-</head>
-<body>
-    <h2>Employee List</h2>
-    <a href="{{ url_for('employee.add_employee') }}">Add New Employee</a>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Emp ID</th>
-                <th>Name</th>
-                <th>DOB</th>
-                <th>Gender</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Hire Date</th>
-                <th>Department</th>
-                <th>Designation</th>
-                <th>Salary</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for emp in employees %}
-            <tr>
-                <td>{{ emp.emp_id }}</td>
-                <td>{{ emp.first_name }} {{ emp.last_name }}</td>
-                <td>{{ emp.dob }}</td>
-                <td>{{ emp.gender }}</td>
-                <td>{{ emp.email }}</td>
-                <td>{{ emp.phone }}</td>
-                <td>{{ emp.hire_date }}</td>
-                <td>{{ emp.professional.department if emp.professional else '' }}</td>
-                <td>{{ emp.professional.designation if emp.professional else '' }}</td>
-                <td>{{ emp.professional.salary if emp.professional else '' }}</td>
-                <td>
-                    <a href="{{ url_for('employee.edit_employee', emp_id=emp.emp_id) }}">Edit</a> |
-                    <a href="{{ url_for('employee.add_update_professional', emp_id=emp.emp_id) }}">Prof. Info</a>
-                    <form method="POST" action="{{ url_for('employee.delete_employee', emp_id=emp.emp_id) }}" style="display:inline;">
-                        <button type="submit">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</body>
-</html>
+<h2>Employees</h2>
+<a href="{{ url_for('employee.add_employee') }}">Add Employee</a>
+<table>
+  <tr>
+    <th>Name</th><th>Email</th><th>Phone</th><th>Department</th><th>Actions</th>
+  </tr>
+  {% for emp in employees %}
+  <tr>
+    <td>{{ emp.first_name }} {{ emp.last_name }}</td>
+    <td>{{ emp.email }}</td>
+    <td>{{ emp.phone }}</td>
+    <td>{{ emp.professional.department if emp.professional else 'N/A' }}</td>
+    <td>
+      <a href="{{ url_for('employee.edit_employee', emp_id=emp.emp_id) }}">Edit</a> |
+      <a href="{{ url_for('employee.add_update_professional', emp_id=emp.emp_id) }}">Professional Info</a> |
+      <form method="POST" action="{{ url_for('employee.delete_employee', emp_id=emp.emp_id) }}" style="display:inline;">
+        <button type="submit">Delete</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
