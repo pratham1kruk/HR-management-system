@@ -1,53 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Professional Info</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Add Professional Info</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background-color: #f5f5f5;
+        }
+        h2 {
+            font-size: 28px;
+            color: #333;
+        }
+        form {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            box-shadow: 0px 0px 12px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .submit-btn {
+            margin-top: 25px;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #007bff;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
-<body class="bg-light">
-    <div class="container py-5">
-        <h2 class="mb-4 text-center text-primary">
-            {{ professional and professional.emp_id ? 'Update' : 'Add' }} Professional Info
-        </h2>
+<body>
+    <h2>🧑‍💼 Add Professional Information</h2>
+    <form method="POST">
+        <label for="emp_id">Employee ID</label>
+        <input type="number" name="emp_id" id="emp_id" required>
 
-        <form method="POST">
-            <div class="mb-3">
-                <label for="emp_id" class="form-label">Employee ID *</label>
-                <input type="number" name="emp_id" id="emp_id" class="form-control" required
-                       value="{{ employee.emp_id if employee else professional.emp_id if professional else '' }}"
-                       {% if professional or employee %}readonly{% endif %}>
-            </div>
+        <label for="designation">Designation</label>
+        <input type="text" name="designation" id="designation" required>
 
-            <div class="mb-3">
-                <label for="designation" class="form-label">Designation</label>
-                <input type="text" name="designation" id="designation" class="form-control"
-                       value="{{ professional.designation if professional else '' }}">
-            </div>
+        <label for="department">Department</label>
+        <input type="text" name="department" id="department" required>
 
-            <div class="mb-3">
-                <label for="department" class="form-label">Department</label>
-                <input type="text" name="department" id="department" class="form-control"
-                       value="{{ professional.department if professional else '' }}">
-            </div>
+        <label for="current_salary">Current Salary</label>
+        <input type="number" step="0.01" name="current_salary" id="current_salary" required>
 
-            <div class="mb-3">
-                <label for="current_salary" class="form-label">Current Salary</label>
-                <input type="number" step="0.01" name="current_salary" id="current_salary" class="form-control"
-                       value="{{ professional.current_salary if professional else '' }}">
-            </div>
+        <label for="previous_salary">Previous Salary</label>
+        <input type="number" step="0.01" name="previous_salary" id="previous_salary" required>
 
-            <div class="mb-3">
-                <label for="previous_salary" class="form-label">Previous Salary</label>
-                <input type="number" step="0.01" name="previous_salary" id="previous_salary" class="form-control"
-                       value="{{ professional.previous_salary if professional else '' }}">
-            </div>
+        <button type="submit" class="submit-btn">Save Professional Info</button>
+    </form>
 
-            <div class="d-flex justify-content-between">
-                <a href="{{ url_for('employee.employee_home') }}" class="btn btn-secondary">Back</a>
-                <button type="submit" class="btn btn-success">Save Professional Info</button>
-            </div>
-        </form>
-    </div>
+    <a href="{{ url_for('employee.list_employees') }}" class="back-link">← Back to Employee List</a>
 </body>
 </html>
