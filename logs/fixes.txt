@@ -5,4 +5,7 @@ Session 1 starts
 
 checkpoint 1 completed
 
-checkpoint 2 in progress
+checkpoint 2 completed
+
+checkpoint 3 in progress
+-working with stats and analytical window
