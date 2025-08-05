@@ -12,62 +12,84 @@
     </style>
 </head>
 <body class="bg-light">
-    <div class="container py-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="text-primary">📋 All Employee Records</h2>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary">📋 All Employee Records</h2>
+        <div>
+            <button class="btn btn-sm btn-outline-secondary me-2" onclick="toggleEmpId()">Toggle EmpID</button>
             <a href="{{ url_for('employee.employee_home') }}" class="btn btn-secondary">Back to Dashboard</a>
         </div>
-
-        <table class="table table-bordered table-striped table-hover">
-            <thead class="table-dark text-center">
-                <tr>
-                    <th>ID</th>
-                    <th>Full Name</th>
-                    <th>DOB</th>
-                    <th>Gender</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Hire Date</th>
-                    <th>Designation</th>
-                    <th>Department</th>
-                    <th>Current Salary</th>
-                    <th>Previous Salary</th>
-                    <th colspan="3">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for emp in employees %}
-                <tr>
-                    <td class="text-center">{{ emp.emp_id }}</td>
-                    <td>{{ emp.full_name }}</td>
-                    <td>{{ emp.dob or '—' }}</td>
-                    <td>{{ emp.gender or '—' }}</td>
-                    <td>{{ emp.email or '—' }}</td>
-                    <td>{{ emp.phone or '—' }}</td>
-                    <td>{{ emp.hire_date or '—' }}</td>
-                    <td>{{ emp.professional.designation if emp.professional else '—' }}</td>
-                    <td>{{ emp.professional.department if emp.professional else '—' }}</td>
-                    <td>{{ emp.professional.current_salary if emp.professional else '—' }}</td>
-                    <td>{{ emp.professional.previous_salary if emp.professional else '—' }}</td>
-                    <td>
-                        <a href="{{ url_for('employee.edit_employee', emp_id=emp.emp_id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-                    </td>
-                    <td>
-                        <a href="{{ url_for('employee.add_professional_info', emp_id=emp.emp_id) }}" class="btn btn-sm btn-outline-success">Edit Prof.</a>
-                    </td>
-                    <td>
-                        <form method="POST" action="{{ url_for('employee.delete_employee', emp_id=emp.emp_id) }}" onsubmit="return confirm('Are you sure you want to delete this employee?');">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">🗑️</button>
-                        </form>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="13" class="text-center text-muted">No employee records found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
     </div>
+
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="table-dark text-center">
+            <tr>
+                <th>#</th>
+                <th class="emp-id-column d-none">EmpID</th>
+                <th>Full Name</th>
+                <th>DOB</th>
+                <th>Gender</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Hire Date</th>
+                <th>Designation</th>
+                <th>Department</th>
+                <th>Current Salary</th>
+                <th>Previous Salary</th>
+                <th colspan="3">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for emp in employees %}
+            <tr>
+                <td class="text-center" data-bs-toggle="tooltip" title="EmpID: {{ emp.emp_id }}">{{ loop.index }}</td>
+                <td class="emp-id-column d-none text-center">{{ emp.emp_id }}</td>
+                <td>{{ emp.full_name }}</td>
+                <td>{{ emp.dob or '—' }}</td>
+                <td>{{ emp.gender or '—' }}</td>
+                <td>{{ emp.email or '—' }}</td>
+                <td>{{ emp.phone or '—' }}</td>
+                <td>{{ emp.hire_date or '—' }}</td>
+                <td>{{ emp.professional.designation if emp.professional else '—' }}</td>
+                <td>{{ emp.professional.department if emp.professional else '—' }}</td>
+                <td>{{ emp.professional.current_salary if emp.professional else '—' }}</td>
+                <td>{{ emp.professional.previous_salary if emp.professional else '—' }}</td>
+                <td>
+                    <a href="{{ url_for('employee.edit_employee', emp_id=emp.emp_id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                </td>
+                <td>
+                    <a href="{{ url_for('employee.add_professional_info', emp_id=emp.emp_id) }}" class="btn btn-sm btn-outline-success">Edit Prof.</a>
+                </td>
+                <td>
+                    <form method="POST" action="{{ url_for('employee.delete_employee', emp_id=emp.emp_id) }}" onsubmit="return confirm('Are you sure you want to delete this employee?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">🗑️</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="14" class="text-center text-muted">No employee records found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Bootstrap JS for tooltip -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Enable Bootstrap tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(t => new bootstrap.Tooltip(t));
+
+    // Toggle EmpID column
+    function toggleEmpId() {
+        document.querySelectorAll('.emp-id-column').forEach(col => {
+            col.classList.toggle('d-none');
+        });
+    }
+</script>
+
 </body>
 </html>
