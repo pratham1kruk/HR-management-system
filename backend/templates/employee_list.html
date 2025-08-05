@@ -37,6 +37,9 @@
                 <th>Department</th>
                 <th>Current Salary</th>
                 <th>Previous Salary</th>
+                <th>Last Increment</th>
+                <th>Skills</th>
+                <th>Rating</th>
                 <th colspan="3">Actions</th>
             </tr>
         </thead>
@@ -55,11 +58,14 @@
                 <td>{{ emp.professional.department if emp.professional else '—' }}</td>
                 <td>{{ emp.professional.current_salary if emp.professional else '—' }}</td>
                 <td>{{ emp.professional.previous_salary if emp.professional else '—' }}</td>
+                <td>{{ emp.professional.last_increment if emp.professional else '—' }}</td>
+                <td>{{ emp.professional.skills|join(', ') if emp.professional and emp.professional.skills else '—' }}</td>
+                <td>{{ emp.professional.performance_rating if emp.professional else '—' }}</td>
                 <td>
                     <a href="{{ url_for('employee.edit_employee', emp_id=emp.emp_id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
                 </td>
                 <td>
-                    <a href="{{ url_for('employee.add_professional_info', emp_id=emp.emp_id) }}" class="btn btn-sm btn-outline-success">Edit Prof.</a>
+                    <a href="{{ url_for('employee.edit_professional', emp_id=emp.emp_id) }}" class="btn btn-sm btn-outline-success">Edit Prof.</a>
                 </td>
                 <td>
                     <form method="POST" action="{{ url_for('employee.delete_employee', emp_id=emp.emp_id) }}" onsubmit="return confirm('Are you sure you want to delete this employee?');">
@@ -69,7 +75,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="14" class="text-center text-muted">No employee records found.</td>
+                <td colspan="17" class="text-center text-muted">No employee records found.</td>
             </tr>
             {% endfor %}
         </tbody>
