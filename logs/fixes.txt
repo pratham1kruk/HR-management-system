@@ -1,0 +1,4 @@
+***detailed log of fixes made or in current debugging session***
+693f254 <head #code> , 693f25445af3115882501e28a729f01d76e5e639 complete commit id marks checkpoint 001
+
+Session 1 starts
