@@ -3,7 +3,6 @@ DROP TABLE IF EXISTS salary_log;
 DROP TABLE IF EXISTS professional_info;
 DROP TABLE IF EXISTS employee;
 
--- 1. Create employee table
 CREATE TABLE IF NOT EXISTS employee (
     emp_id SERIAL PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
@@ -15,19 +14,17 @@ CREATE TABLE IF NOT EXISTS employee (
     hire_date DATE DEFAULT CURRENT_DATE
 );
 
--- 2. Create professional_info table with extended fields
 CREATE TABLE IF NOT EXISTS professional_info (
     emp_id INT PRIMARY KEY REFERENCES employee(emp_id),
-    department VARCHAR(100),
     designation VARCHAR(100),
-    experience INT,
-    salary NUMERIC(10,2),
+    department VARCHAR(100),
+    current_salary NUMERIC(10,2),
+    previous_salary NUMERIC(10,2),
     last_increment NUMERIC(10,2),
     skills TEXT[],
-    performance_rating INT CHECK (performance_rating BETWEEN 1 AND 5)
+    performance_rating FLOAT
 );
 
--- 3. Create salary_log for triggers
 CREATE TABLE IF NOT EXISTS salary_log (
     log_id SERIAL PRIMARY KEY,
     emp_id INT REFERENCES employee(emp_id),
@@ -37,6 +34,7 @@ CREATE TABLE IF NOT EXISTS salary_log (
     action TEXT DEFAULT 'update',
     deleted_at TIMESTAMP
 );
+
 
 -- 4. Insert sample employees
 INSERT INTO employee (
