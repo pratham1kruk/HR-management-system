@@ -1,30 +1,23 @@
+# routes/analytics_routes.py
+
 from flask import Blueprint, render_template
 from models.postgres_models import db
 from sqlalchemy import text
 
 analytics_bp = Blueprint("analytics", __name__, url_prefix="/analytics")
 
-# ─────────────────────────────
-# Analytics Homepage
-# ─────────────────────────────
 @analytics_bp.route("/")
 def stats_home():
     stats = {}
 
-    # 1. Top earners per department
+    # Views
     stats["top_earners"] = db.session.execute(text("SELECT * FROM top_earners_per_department")).fetchall()
-
-    # 2. Low performers
     stats["low_performers"] = db.session.execute(text("SELECT * FROM low_performers")).fetchall()
-
-    # 3. Promotion candidates
     stats["promotion_candidates"] = db.session.execute(text("SELECT * FROM promotion_candidates")).fetchall()
+    stats["experienced_employees"] = db.session.execute(text("SELECT * FROM experienced_employees")).fetchall()
 
-    # 4. Experienced employees (>3 years)
-    stats["experienced"] = db.session.execute(text("SELECT * FROM experienced_employees")).fetchall()
-
-    # 5. Salary Grades
-    stats["grades"] = db.session.execute(text("""
+    # CASE-based salary grades
+    stats["salary_grades"] = db.session.execute(text("""
         SELECT emp_id, department, salary,
         CASE 
             WHEN salary > 70000 THEN 'High'
@@ -34,19 +27,42 @@ def stats_home():
         FROM professional_info
     """)).fetchall()
 
-    # 6. Rank by salary
+    # RANK by salary
     stats["salary_ranks"] = db.session.execute(text("""
         SELECT emp_id, salary,
-        RANK() OVER (ORDER BY salary DESC) AS rank
+        RANK() OVER (ORDER BY salary DESC) AS salary_rank
         FROM professional_info
     """)).fetchall()
 
-    # 7. Running salary sum & avg
-    stats["salary_running"] = db.session.execute(text("""
+    # Running salary stats
+    stats["running_salary"] = db.session.execute(text("""
         SELECT emp_id, salary,
-        SUM(salary) OVER (ORDER BY emp_id) AS running_sum,
-        AVG(salary) OVER (ORDER BY emp_id) AS running_avg
+        SUM(salary) OVER (ORDER BY emp_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_sum,
+        AVG(salary) OVER (ORDER BY emp_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_avg
         FROM professional_info
+    """)).fetchall()
+
+    # LEAD & LAG salaries
+    stats["salary_lead_lag"] = db.session.execute(text("""
+        SELECT emp_id, salary, last_increment,
+        LAG(salary) OVER (ORDER BY emp_id) AS previous_salary,
+        LEAD(salary) OVER (ORDER BY emp_id) AS next_salary
+        FROM professional_info
+    """)).fetchall()
+
+    # Avg salary comparison with department
+    stats["departments_above_avg"] = db.session.execute(text("""
+        WITH dept_avg AS (
+            SELECT department, AVG(salary) AS dept_avg_salary
+            FROM professional_info
+            GROUP BY department
+        ), overall_avg AS (
+            SELECT AVG(salary) AS overall_salary
+            FROM professional_info
+        )
+        SELECT d.*
+        FROM dept_avg d, overall_avg o
+        WHERE d.dept_avg_salary > o.overall_salary
     """)).fetchall()
 
     return render_template("stats.html", stats=stats)
