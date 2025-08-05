@@ -16,19 +16,13 @@ CORS(app)
 from config import Config
 app.config.from_object(Config)
 
-# Initialize SQLAlchemy
-db = SQLAlchemy(app)
+# --- Fix: Import db from postgres_models ---
+from models.postgres_models import db  # ✅ this uses the same db instance
+db.init_app(app)  # ✅ this binds the db with your Flask app
 
 # Initialize MongoDB
 app.config["MONGO_URI"] = Config.MONGO_URI
 mongo = PyMongo(app)
-
-# Make db and mongo available across modules
-from models import postgres_models
-postgres_models.db = db
-
-from models import mongo_models
-mongo_models.mongo = mongo
 
 # Import and Register Blueprints
 from routes.employee_routes import employee_bp
@@ -36,7 +30,7 @@ from routes.mongo_routes import mongo_bp
 from routes.analytics_routes import analytics_bp
 
 app.register_blueprint(employee_bp, url_prefix="/employees")
-app.register_blueprint(mongo_bp, url_prefix="/personnel")  # Match route in mongo_routes
+app.register_blueprint(mongo_bp, url_prefix="/personnel")
 app.register_blueprint(analytics_bp, url_prefix="/analytics")
 
 # Home Page
