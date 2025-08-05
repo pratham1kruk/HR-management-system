@@ -18,6 +18,10 @@ class Employee(db.Model):
     # One-to-one relationship to professional info
     professional = db.relationship("ProfessionalInfo", backref="employee", uselist=False)
 
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
 
 class ProfessionalInfo(db.Model):
     __tablename__ = 'professional_info'
@@ -25,11 +29,11 @@ class ProfessionalInfo(db.Model):
     emp_id = db.Column(db.Integer, db.ForeignKey('employee.emp_id'), primary_key=True)
     designation = db.Column(db.String(100))
     department = db.Column(db.String(100))
-    experience = db.Column(db.Integer)
-    salary = db.Column(db.Numeric(10, 2))
+    current_salary = db.Column(db.Numeric(10, 2))
+    previous_salary = db.Column(db.Numeric(10, 2))
     last_increment = db.Column(db.Numeric(10, 2))
-    skills = db.Column(db.ARRAY(db.Text))  # PostgreSQL array of text
-    performance_rating = db.Column(db.Integer)  # Check constraint handled in DB
+    skills = db.Column(db.ARRAY(db.String))  # PostgreSQL array of skills (text)
+    performance_rating = db.Column(db.Float)  # 0.0 to 5.0 or 10.0 scale
 
 
 class AuditLog(db.Model):
