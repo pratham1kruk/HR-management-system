@@ -15,13 +15,7 @@ class Employee(db.Model):
     phone = db.Column(db.String(20))
     hire_date = db.Column(db.Date, default=datetime.utcnow)
 
-    # One-to-one relationship to professional info
     professional = db.relationship("ProfessionalInfo", backref="employee", uselist=False)
-
-    @property
-    def full_name(self):
-        return f"{self.first_name} {self.last_name}"
-
 
 class ProfessionalInfo(db.Model):
     __tablename__ = 'professional_info'
@@ -32,16 +26,15 @@ class ProfessionalInfo(db.Model):
     current_salary = db.Column(db.Numeric(10, 2))
     previous_salary = db.Column(db.Numeric(10, 2))
     last_increment = db.Column(db.Numeric(10, 2))
-    skills = db.Column(db.ARRAY(db.String))  # PostgreSQL array of skills (text)
-    performance_rating = db.Column(db.Float)  # 0.0 to 5.0 or 10.0 scale
-
+    skills = db.Column(db.ARRAY(db.Text))
+    performance_rating = db.Column(db.Float)
 
 class AuditLog(db.Model):
     __tablename__ = 'audit_log'
 
     id = db.Column(db.Integer, primary_key=True)
     emp_id = db.Column(db.Integer)
-    action = db.Column(db.String(20))  # INSERT, UPDATE, DELETE
+    action = db.Column(db.String(20))
     table_name = db.Column(db.String(100))
     old_data = db.Column(db.JSON)
     new_data = db.Column(db.JSON)
