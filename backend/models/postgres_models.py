@@ -15,7 +15,7 @@ class Employee(db.Model):
     phone = db.Column(db.String(20))
     hire_date = db.Column(db.Date, default=datetime.utcnow)
 
-    # Optional one-to-one relationship (not used for inserting, just helpful for joins)
+    # One-to-one relationship to professional info
     professional = db.relationship("ProfessionalInfo", backref="employee", uselist=False)
 
 
@@ -25,8 +25,11 @@ class ProfessionalInfo(db.Model):
     emp_id = db.Column(db.Integer, db.ForeignKey('employee.emp_id'), primary_key=True)
     designation = db.Column(db.String(100))
     department = db.Column(db.String(100))
-    current_salary = db.Column(db.Numeric(10, 2))
-    previous_salary = db.Column(db.Numeric(10, 2))
+    experience = db.Column(db.Integer)
+    salary = db.Column(db.Numeric(10, 2))
+    last_increment = db.Column(db.Numeric(10, 2))
+    skills = db.Column(db.ARRAY(db.Text))  # PostgreSQL array of text
+    performance_rating = db.Column(db.Integer)  # Check constraint handled in DB
 
 
 class AuditLog(db.Model):
