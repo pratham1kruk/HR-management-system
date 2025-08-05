@@ -18,18 +18,17 @@
             background-color: #fff;
             padding: 30px;
             border-radius: 8px;
-            max-width: 600px;
+            max-width: 700px;
             box-shadow: 0px 0px 12px rgba(0,0,0,0.1);
         }
         label {
-            display: block;
             margin-top: 15px;
             font-weight: bold;
         }
         input[type="text"],
         input[type="number"] {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             margin-top: 6px;
             border: 1px solid #ccc;
             border-radius: 4px;
@@ -61,6 +60,7 @@
 <body>
     <h2>{{ '📝 Edit' if professional else '🧑‍💼 Add' }} Professional Information</h2>
     <form method="POST">
+        <!-- Employee ID -->
         <label for="emp_id">Employee ID</label>
         {% if professional %}
             <input type="number" name="emp_id" id="emp_id" value="{{ emp_id }}" readonly>
@@ -68,27 +68,35 @@
             <input type="number" name="emp_id" id="emp_id" value="{{ emp_id or '' }}" required>
         {% endif %}
 
+        <!-- Designation -->
         <label for="designation">Designation</label>
         <input type="text" name="designation" id="designation" value="{{ professional.designation if professional else '' }}" required>
 
+        <!-- Department -->
         <label for="department">Department</label>
         <input type="text" name="department" id="department" value="{{ professional.department if professional else '' }}" required>
 
+        <!-- Current Salary -->
         <label for="current_salary">Current Salary</label>
         <input type="number" step="0.01" name="current_salary" id="current_salary" value="{{ professional.current_salary if professional else '' }}" required>
 
+        <!-- Previous Salary -->
         <label for="previous_salary">Previous Salary</label>
         <input type="number" step="0.01" name="previous_salary" id="previous_salary" value="{{ professional.previous_salary if professional else '' }}" required>
 
+        <!-- Last Increment -->
         <label for="last_increment">Last Increment</label>
         <input type="number" step="0.01" name="last_increment" id="last_increment" value="{{ professional.last_increment if professional else '' }}" required>
 
+        <!-- Skills -->
         <label for="skills">Skills (comma-separated)</label>
         <input type="text" name="skills" id="skills" value="{{ professional.skills|join(', ') if professional and professional.skills else '' }}">
 
-        <label for="performance_rating">Performance Rating</label>
-        <input type="number" step="0.01" name="performance_rating" id="performance_rating" value="{{ professional.performance_rating if professional else '' }}" required>
+        <!-- Performance Rating -->
+        <label for="performance_rating">Performance Rating (0-5)</label>
+        <input type="number" step="0.1" min="0" max="5" name="performance_rating" id="performance_rating" value="{{ professional.performance_rating if professional else '' }}" required>
 
+        <!-- Submit -->
         <button type="submit" class="submit-btn">{{ 'Update' if professional else 'Save' }} Professional Info</button>
     </form>
 
