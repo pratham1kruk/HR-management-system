@@ -1,66 +1,96 @@
-<!-- templates/stats.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>{{ title or "Analytics Report" }}</title>
+    <title>Add Professional Info</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            padding: 20px;
-            background: #f4f4f4;
+            padding: 40px;
+            background-color: #f5f5f5;
         }
-        h1 {
+        h2 {
+            font-size: 28px;
             color: #333;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        form {
             background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            box-shadow: 0px 0px 12px rgba(0,0,0,0.1);
         }
-        th, td {
-            padding: 10px;
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 6px;
             border: 1px solid #ccc;
-            text-align: left;
+            border-radius: 4px;
         }
-        th {
-            background-color: #555;
+        .submit-btn {
+            margin-top: 25px;
+            background-color: #007bff;
             color: white;
+            padding: 10px 20px;
+            border: none;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
         }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
+        .submit-btn:hover {
+            background-color: #0056b3;
         }
-        a {
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
             text-decoration: none;
-            color: #007BFF;
+            color: #007bff;
+        }
+        .back-link:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <h1>{{ title or "Analytics" }}</h1>
+    <h2>🧑‍💼 Add Professional Information</h2>
+    <form method="POST">
+        <label for="emp_id">Employee ID</label>
+        <input type="number" name="emp_id" id="emp_id" value="{{ professional.emp_id if professional else '' }}" {% if professional %}readonly{% endif %} required>
 
-    {% if data %}
-        <table>
-            <thead>
-                <tr>
-                    <th>{{ label1 or "Column 1" }}</th>
-                    <th>{{ label2 or "Column 2" }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in data %}
-                    <tr>
-                        <td>{{ row[0] }}</td>
-                        <td>{{ row[1] }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No data available.</p>
-    {% endif %}
+        <label for="designation">Designation</label>
+        <input type="text" name="designation" id="designation" value="{{ professional.designation if professional else '' }}" required>
 
-    <p><a href="/">← Back to Home</a></p>
+        <label for="department">Department</label>
+        <input type="text" name="department" id="department" value="{{ professional.department if professional else '' }}" required>
+
+        <label for="current_salary">Current Salary</label>
+        <input type="number" step="0.01" name="current_salary" id="current_salary" value="{{ professional.current_salary if professional else '' }}" required>
+
+        <label for="previous_salary">Previous Salary</label>
+        <input type="number" step="0.01" name="previous_salary" id="previous_salary" value="{{ professional.previous_salary if professional else '' }}" required>
+
+        <label for="last_increment">Last Increment</label>
+        <input type="number" step="0.01" name="last_increment" id="last_increment" value="{{ professional.last_increment if professional else '' }}" required>
+
+        <label for="skills">Skills (comma-separated)</label>
+        <input type="text" name="skills" id="skills" value="{{ professional.skills|join(', ') if professional and professional.skills else '' }}">
+
+        <label for="performance_rating">Performance Rating (1–5)</label>
+        <select name="performance_rating" id="performance_rating" required>
+            {% for i in range(1, 6) %}
+                <option value="{{ i }}" {% if professional and professional.performance_rating == i %}selected{% endif %}>{{ i }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" class="submit-btn">Save Professional Info</button>
+    </form>
+
+    <a href="{{ url_for('employee.list_employees') }}" class="back-link">← Back to Employee List</a>
 </body>
 </html>
