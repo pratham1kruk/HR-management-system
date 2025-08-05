@@ -8,4 +8,9 @@ checkpoint 1 completed
 checkpoint 2 completed
 
 checkpoint 3 in progress
--working with stats and analytical window
+-working with employee crud window
+
+checkpoint 3 , complete session 1 over
+
+Session 2 starts
+checkpoint 4 started
