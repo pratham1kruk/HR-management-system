@@ -11,18 +11,16 @@ employee_bp = Blueprint("employee", __name__, url_prefix="/employees")
 def employee_home():
     return render_template("employee_home.html")
 
-
 # ─────────────────────────────
-# VIEW: List all employees with joined professional info
+# VIEW: List all employees
 # ─────────────────────────────
 @employee_bp.route("/")
 def list_employees():
     employees = db.session.query(Employee).outerjoin(ProfessionalInfo).all()
     return render_template("employee_list.html", employees=employees)
 
-
 # ─────────────────────────────
-# ADD: Basic Employee Info only
+# ADD: Basic Employee Info
 # ─────────────────────────────
 @employee_bp.route("/new", methods=["GET", "POST"])
 def add_employee():
@@ -30,49 +28,50 @@ def add_employee():
         new_emp = Employee(
             first_name=request.form["first_name"],
             last_name=request.form["last_name"],
-            dob=request.form["dob"],
-            gender=request.form["gender"],
-            email=request.form["email"],
-            phone=request.form["phone"],
+            dob=request.form.get("dob"),
+            gender=request.form.get("gender"),
+            email=request.form.get("email"),
+            phone=request.form.get("phone"),
             hire_date=datetime.strptime(request.form["hire_date"], "%Y-%m-%d")
         )
         db.session.add(new_emp)
         db.session.commit()
-        flash("Employee basic info added.")
+        flash("Employee added.")
         return redirect(url_for("employee.employee_home"))
     return render_template("employee_form.html")
 
-
 # ─────────────────────────────
-# ADD: Professional Info only using emp_id
+# ADD: Professional Info
 # ─────────────────────────────
 @employee_bp.route("/professional", methods=["GET", "POST"])
 def add_professional_info():
     if request.method == "POST":
         emp_id = int(request.form["emp_id"])
-        existing_prof = ProfessionalInfo.query.filter_by(emp_id=emp_id).first()
+        existing = ProfessionalInfo.query.filter_by(emp_id=emp_id).first()
 
-        if existing_prof:
-            flash("Professional info already exists for this employee. Use list view to update.")
+        if existing:
+            flash("Professional info already exists. Use edit instead.")
             return redirect(url_for("employee.list_employees"))
 
         prof = ProfessionalInfo(
             emp_id=emp_id,
-            department=request.form["department"],
             designation=request.form["designation"],
-            current_salary=float(request.form["current_salary"]),
-            previous_salary=float(request.form["previous_salary"])
+            department=request.form["department"],
+            experience=int(request.form["experience"]),
+            salary=float(request.form["salary"]),
+            last_increment=float(request.form["last_increment"]),
+            skills=request.form.getlist("skills"),  # checkbox or multi-select
+            performance_rating=int(request.form["performance_rating"])
         )
         db.session.add(prof)
         db.session.commit()
         flash("Professional info added.")
-        return redirect(url_for("employee.employee_home"))
-    
-    return render_template("professional_form.html")
+        return redirect(url_for("employee.list_employees"))
 
+    return render_template("professional_form.html", professional=None)
 
 # ─────────────────────────────
-# EDIT: General Info via list
+# EDIT: Employee Info
 # ─────────────────────────────
 @employee_bp.route("/edit/<int:emp_id>", methods=["GET", "POST"])
 def edit_employee(emp_id):
@@ -86,39 +85,39 @@ def edit_employee(emp_id):
         emp.phone = request.form["phone"]
         emp.hire_date = datetime.strptime(request.form["hire_date"], "%Y-%m-%d")
         db.session.commit()
-        flash("Employee info updated.")
+        flash("Employee updated.")
         return redirect(url_for("employee.list_employees"))
     return render_template("employee_form.html", employee=emp)
 
-
 # ─────────────────────────────
-# EDIT: Professional Info via list
+# EDIT: Professional Info
 # ─────────────────────────────
 @employee_bp.route("/edit/professional/<int:emp_id>", methods=["GET", "POST"])
 def edit_professional(emp_id):
-    prof = ProfessionalInfo.query.filter_by(emp_id=emp_id).first_or_404()
+    prof = ProfessionalInfo.query.get_or_404(emp_id)
     if request.method == "POST":
         prof.department = request.form["department"]
         prof.designation = request.form["designation"]
-        prof.current_salary = float(request.form["current_salary"])
-        prof.previous_salary = float(request.form["previous_salary"])
+        prof.experience = int(request.form["experience"])
+        prof.salary = float(request.form["salary"])
+        prof.last_increment = float(request.form["last_increment"])
+        prof.skills = request.form.getlist("skills")
+        prof.performance_rating = int(request.form["performance_rating"])
         db.session.commit()
         flash("Professional info updated.")
         return redirect(url_for("employee.list_employees"))
     return render_template("professional_form.html", professional=prof)
 
-
 # ─────────────────────────────
-# DELETE: Entire Employee record
+# DELETE: Employee & Professional
 # ─────────────────────────────
 @employee_bp.route("/delete/<int:emp_id>", methods=["POST"])
 def delete_employee(emp_id):
     prof = ProfessionalInfo.query.filter_by(emp_id=emp_id).first()
     if prof:
         db.session.delete(prof)
-
     emp = Employee.query.get_or_404(emp_id)
     db.session.delete(emp)
     db.session.commit()
-    flash("Employee and related professional info deleted.")
+    flash("Employee and professional info deleted.")
     return redirect(url_for("employee.list_employees"))
