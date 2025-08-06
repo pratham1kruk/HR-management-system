@@ -1,0 +1,6 @@
+make up         # Start containers + run professional_info + init_employee
+make down       # Stop and remove containers & volumes
+make restart    # Stop, clean, and re-run full setup
+make logs       # Live logs
+make reset-db   # Drop all tables and views
+make init-db    # Reinitialize schema & seed (after reset)
