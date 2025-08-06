@@ -46,8 +46,9 @@ INSERT INTO employee (
 
 -- 5. Insert sample professional_info
 INSERT INTO professional_info (
-    emp_id, department, designation, experience, salary, last_increment, skills, performance_rating
+    emp_id, department, designation, current_salary, previous_salary, last_increment, skills, performance_rating
 ) VALUES
-(1, 'Finance', 'Senior Analyst', 5, 85000.00, 5000.00, ARRAY['Excel', 'Risk Analysis'], 3),
-(2, 'Engineering', 'Team Lead', 6, 95000.00, 6000.00, ARRAY['Python', 'System Design'], 4),
-(3, 'HR', 'Recruiter', 2, 55000.00, 3000.00, ARRAY['Recruitment', 'Compliance'], 5);
+(1, 'Finance', 'Senior Analyst', 85000.00, 80000.00, 5000.00, ARRAY['Excel', 'Risk Analysis'], 3),
+(2, 'Engineering', 'Team Lead', 95000.00, 89000.00, 6000.00, ARRAY['Python', 'System Design'], 4),
+(3, 'HR', 'Recruiter', 55000.00, 52000.00, 3000.00, ARRAY['Recruitment', 'Compliance'], 5);
+
