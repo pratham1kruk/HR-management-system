@@ -1,37 +1,132 @@
-<!-- templates/personnel_info.html -->
+<!-- templates/personnel_form.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Personnel Information</title>
+    <title>{{ action }} Personnel Info</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Personnel Information</h1>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Employee ID</th>
-                <th>Aadhar</th>
-                <th>PAN</th>
-                <th>Dependents</th>
-                <th>Residence</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for p in personnel %}
-            <tr>
-                <td>{{ p.name }}</td>
-                <td>{{ p.employee_id }}</td>
-                <td>{{ p.adhar }}</td>
-                <td>{{ p.pan }}</td>
-                <td>{{ p.num_dependents }}</td>
-                <td>{{ p.residence }}</td>
-                <td><a href="/mongo/personnel/{{ p._id }}">View/Edit</a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<body class="container py-4">
+    <h2 class="mb-4">{{ action }} Personnel Info</h2>
+    <form method="POST">
+        <div class="row mb-3">
+            <div class="col">
+                <label>Employee ID</label>
+                <input type="text" name="employee_id" class="form-control" value="{{ data.get('employee_id', '') }}" required>
+            </div>
+            <div class="col">
+                <label>Name</label>
+                <input type="text" name="name" class="form-control" value="{{ data.get('name', '') }}" required>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col">
+                <label>Aadhaar</label>
+                <input type="text" name="aadhaar" class="form-control" value="{{ data.get('aadhaar', '') }}">
+            </div>
+            <div class="col">
+                <label>PAN</label>
+                <input type="text" name="pan" class="form-control" value="{{ data.get('pan', '') }}">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col">
+                <label>DOB</label>
+                <input type="date" name="dob" class="form-control" value="{{ data.get('dob', '') }}">
+            </div>
+            <div class="col">
+                <label>Gender</label>
+                <input type="text" name="gender" class="form-control" value="{{ data.get('gender', '') }}">
+            </div>
+            <div class="col">
+                <label>Blood Group</label>
+                <input type="text" name="blood_group" class="form-control" value="{{ data.get('blood_group', '') }}">
+            </div>
+        </div>
+
+        <hr>
+        <h5>Residence</h5>
+        <div class="row mb-3">
+            <div class="col">
+                <label>Address</label>
+                <input type="text" name="address" class="form-control" value="{{ data.get('residence', {}).get('address', '') }}">
+            </div>
+            <div class="col">
+                <label>City</label>
+                <input type="text" name="city" class="form-control" value="{{ data.get('residence', {}).get('city', '') }}">
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                <label>State</label>
+                <input type="text" name="state" class="form-control" value="{{ data.get('residence', {}).get('state', '') }}">
+            </div>
+            <div class="col">
+                <label>Zip</label>
+                <input type="text" name="zip" class="form-control" value="{{ data.get('residence', {}).get('zip', '') }}">
+            </div>
+        </div>
+
+        <hr>
+        <h5>Contact</h5>
+        <div class="row mb-3">
+            <div class="col">
+                <label>Phone</label>
+                <input type="text" name="phone" class="form-control" value="{{ data.get('contact', {}).get('phone', '') }}">
+            </div>
+            <div class="col">
+                <label>Email</label>
+                <input type="email" name="email" class="form-control" value="{{ data.get('contact', {}).get('email', '') }}">
+            </div>
+        </div>
+
+        <hr>
+        <h5>Emergency Contact</h5>
+        <div class="row mb-3">
+            <div class="col">
+                <label>Name</label>
+                <input type="text" name="emergency_name" class="form-control" value="{{ data.get('emergency_contact', {}).get('name', '') }}">
+            </div>
+            <div class="col">
+                <label>Phone</label>
+                <input type="text" name="emergency_phone" class="form-control" value="{{ data.get('emergency_contact', {}).get('phone', '') }}">
+            </div>
+        </div>
+
+        <hr>
+        <h5>Family</h5>
+        <div class="row mb-3">
+            <div class="col">
+                <label>Marital Status</label>
+                <input type="text" name="marital_status" class="form-control" value="{{ data.get('family', {}).get('marital_status', '') }}">
+            </div>
+            <div class="col">
+                <label>No. of Dependents</label>
+                <input type="number" name="no_of_dependents" class="form-control" value="{{ data.get('family', {}).get('no_of_dependents', 0) }}">
+            </div>
+        </div>
+
+        <h6>Dependents (Up to 3)</h6>
+        {% for i in range(3) %}
+            <div class="row mb-2">
+                <div class="col">
+                    <input type="text" name="dep_name_{{ i+1 }}" class="form-control" placeholder="Dependent Name" value="{{ data.get('family', {}).get('dependents', [])|default([])|length > i and data['family']['dependents'][i]['name'] or '' }}">
+                </div>
+                <div class="col">
+                    <input type="text" name="dep_relation_{{ i+1 }}" class="form-control" placeholder="Relation" value="{{ data.get('family', {}).get('dependents', [])|default([])|length > i and data['family']['dependents'][i]['relation'] or '' }}">
+                </div>
+                <div class="col">
+                    <input type="number" name="dep_age_{{ i+1 }}" class="form-control" placeholder="Age" value="{{ data.get('family', {}).get('dependents', [])|default([])|length > i and data['family']['dependents'][i]['age'] or '' }}">
+                </div>
+            </div>
+        {% endfor %}
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">{{ action }}</button>
+            <a href="/personnel/" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
 </body>
 </html>

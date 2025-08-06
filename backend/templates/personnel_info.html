@@ -1,53 +1,41 @@
+<!-- templates/personnel_info.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>All Personnel Info</title>
-    <style>
-        table, th, td { border: 1px solid black; border-collapse: collapse; padding: 8px; }
-        th { background-color: #f2f2f2; }
-        a.button { padding: 4px 10px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 4px; }
-        a.button.delete { background-color: #DC3545; }
-    </style>
+    <title>Personnel Records</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>All Personnel Information</h1>
-
-    <a class="button" href="{{ url_for('mongo.add_personnel') }}">➕ Add New Personnel</a>
-    <a class="button" href="{{ url_for('bloodgroup_counts') }}">📊 Blood Group Stats</a>
-    <br><br>
-
-    {% if personnel %}
-        <table>
+<body class="container py-5">
+    <h2 class="mb-4">Personnel Records</h2>
+    <a href="/personnel/add" class="btn btn-success mb-3">➕ Add Personnel</a>
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
             <tr>
-                <th>Name</th>
                 <th>Employee ID</th>
-                <th>Gender</th>
+                <th>Name</th>
+                <th>Aadhaar</th>
+                <th>PAN</th>
                 <th>DOB</th>
-                <th>Blood Group</th>
-                <th>City</th>
-                <th>Phone</th>
                 <th>Actions</th>
             </tr>
+        </thead>
+        <tbody>
             {% for p in personnel %}
-                <tr>
-                    <td>{{ p.name }}</td>
-                    <td>{{ p.employee_id }}</td>
-                    <td>{{ p.gender }}</td>
-                    <td>{{ p.dob }}</td>
-                    <td>{{ p.blood_group }}</td>
-                    <td>{{ p.residence.city if p.residence else '' }}</td>
-                    <td>{{ p.contact.phone if p.contact else '' }}</td>
-                    <td>
-                        <a class="button" href="{{ url_for('mongo.update_personnel', id=p._id) }}">✏ Edit</a>
-                        <a class="button delete" href="{{ url_for('mongo.delete_personnel', id=p._id) }}">🗑 Delete</a>
-                        <a class="button" href="{{ url_for('mongo.view_personnel', id=p._id) }}">👁 View JSON</a>
-                    </td>
-                </tr>
+            <tr>
+                <td>{{ p.employee_id }}</td>
+                <td>{{ p.name }}</td>
+                <td>{{ p.aadhaar }}</td>
+                <td>{{ p.pan }}</td>
+                <td>{{ p.dob }}</td>
+                <td>
+                    <a href="/personnel/update/{{ p._id }}" class="btn btn-sm btn-primary">Edit</a>
+                    <a href="/personnel/delete/{{ p._id }}" class="btn btn-sm btn-danger">Delete</a>
+                    <a href="/personnel/{{ p._id }}" class="btn btn-sm btn-secondary">JSON</a>
+                </td>
+            </tr>
             {% endfor %}
-        </table>
-    {% else %}
-        <p>No personnel records found.</p>
-    {% endif %}
+        </tbody>
+    </table>
 </body>
 </html>
