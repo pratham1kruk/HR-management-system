@@ -4,6 +4,10 @@ from app import mongo
 
 mongo_bp = Blueprint('mongo', __name__, url_prefix='/personnel')
 
+@mongo_bp.route('/home')
+def personnel_home():
+    return render_template('personnel_home.html')
+
 # ─────────────────────────────
 # 1. List all personnel
 # ─────────────────────────────
