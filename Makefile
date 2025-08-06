@@ -45,7 +45,7 @@ init-db:
 init-mongo:
 	docker cp db_init/personnel_info.json hr_mongo:/tmp/personnel_info.json
 	docker exec hr_mongo mongosh -u root -p example --authenticationDatabase admin \
-	  --eval 'db.createCollection("employees_info"); db.employees_info.insertMany(JSON.parse(cat("/tmp/personnel_info.json")))'
+	  --eval 'const fs = require("fs"); const data = JSON.parse(fs.readFileSync("/tmp/personnel_info.json")); db.createCollection("employees_info"); db.employees_info.insertMany(data);'
 	@echo "✅ MongoDB seeded with personnel_info.json"
 
 # Reset the PostgreSQL database
