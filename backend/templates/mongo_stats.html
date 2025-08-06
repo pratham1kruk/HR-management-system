@@ -1,0 +1,49 @@
+<!-- templates/mongo_stats.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MongoDB Personnel Analytics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container py-4">
+    <h2 class="mb-4">📊 MongoDB Personnel Analytics</h2>
+
+    <div class="mb-5">
+        <h4>🧾 Missing PAN Records</h4>
+        {% if missing_pan_data %}
+            <ul class="list-group">
+                {% for name, id in missing_pan_data %}
+                    <li class="list-group-item">{{ name }} (ID: {{ id }})</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted">✅ No records missing PAN.</p>
+        {% endif %}
+    </div>
+
+    <div>
+        <h4>🎓 Qualification Counts</h4>
+        {% if qualification_data %}
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Qualification</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for qualification, count in qualification_data %}
+                    <tr>
+                        <td>{{ qualification }}</td>
+                        <td>{{ count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-muted">No data available.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
