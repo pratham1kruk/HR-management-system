@@ -18,3 +18,10 @@ checkpoint 4 complete , session 2 completed
 
 Session 3 starts
 checkpoint 5 started
+
+# Connect to the DB and run interactive SQL commands
+docker exec -it hr_postgres psql -U hradmin -d hrdb
+
+# Example inside psql shell:
+# \dt           → list tables
+# \dv           → list views
