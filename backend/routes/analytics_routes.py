@@ -18,10 +18,10 @@ def stats_home():
 
     # CASE-based salary grades
     stats["salary_grades"] = db.session.execute(text("""
-        SELECT emp_id, department, salary,
+        SELECT emp_id, department, current_salary,
         CASE 
-            WHEN salary > 70000 THEN 'High'
-            WHEN salary BETWEEN 50000 AND 70000 THEN 'Medium'
+            WHEN current_salary > 70000 THEN 'High'
+            WHEN current_salary BETWEEN 50000 AND 70000 THEN 'Medium'
             ELSE 'Low'
         END AS grade
         FROM professional_info
@@ -29,35 +29,35 @@ def stats_home():
 
     # RANK by salary
     stats["salary_ranks"] = db.session.execute(text("""
-        SELECT emp_id, salary,
-        RANK() OVER (ORDER BY salary DESC) AS salary_rank
+        SELECT emp_id, current_salary,
+        RANK() OVER (ORDER BY current_salary DESC) AS salary_rank
         FROM professional_info
     """)).fetchall()
 
     # Running salary stats
     stats["running_salary"] = db.session.execute(text("""
-        SELECT emp_id, salary,
-        SUM(salary) OVER (ORDER BY emp_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_sum,
-        AVG(salary) OVER (ORDER BY emp_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_avg
+        SELECT emp_id, current_salary,
+        SUM(current_salary) OVER (ORDER BY emp_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_sum,
+        AVG(current_salary) OVER (ORDER BY emp_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_avg
         FROM professional_info
     """)).fetchall()
 
     # LEAD & LAG salaries
     stats["salary_lead_lag"] = db.session.execute(text("""
-        SELECT emp_id, salary, last_increment,
-        LAG(salary) OVER (ORDER BY emp_id) AS previous_salary,
-        LEAD(salary) OVER (ORDER BY emp_id) AS next_salary
+        SELECT emp_id, current_salary, last_increment,
+        LAG(current_salary) OVER (ORDER BY emp_id) AS previous_salary,
+        LEAD(current_salary) OVER (ORDER BY emp_id) AS next_salary
         FROM professional_info
     """)).fetchall()
 
     # Avg salary comparison with department
     stats["departments_above_avg"] = db.session.execute(text("""
         WITH dept_avg AS (
-            SELECT department, AVG(salary) AS dept_avg_salary
+            SELECT department, AVG(current_salary) AS dept_avg_salary
             FROM professional_info
             GROUP BY department
         ), overall_avg AS (
-            SELECT AVG(salary) AS overall_salary
+            SELECT AVG(current_salary) AS overall_salary
             FROM professional_info
         )
         SELECT d.*
