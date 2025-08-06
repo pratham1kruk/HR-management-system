@@ -7,4 +7,5 @@ def get_mongo():
 
 def get_personnel_collection():
     mongo = get_mongo()
-    return mongo.db.personnel_info
+    return mongo.db.employees_info  # ✅ This is correct and safe
+
