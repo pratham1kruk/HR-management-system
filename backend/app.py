@@ -8,7 +8,7 @@ import os
 # Load environment variables from .env
 load_dotenv()
 
-# Flask App Init
+# Initialize Flask App
 app = Flask(__name__)
 CORS(app)
 
@@ -16,28 +16,33 @@ CORS(app)
 from config import Config
 app.config.from_object(Config)
 
-# --- Fix: Import db from postgres_models ---
-from models.postgres_models import db  # ✅ this uses the same db instance
-db.init_app(app)  # ✅ this binds the db with your Flask app
+# ✅ Initialize PostgreSQL
+from models.postgres_models import db
+db.init_app(app)
 
-# Initialize MongoDB
+# ✅ Initialize MongoDB
 app.config["MONGO_URI"] = Config.MONGO_URI
 mongo = PyMongo(app)
 
-# Import and Register Blueprints
+# Make mongo accessible app-wide
+app.config['MONGO'] = mongo
+
+# ✅ Register Blueprints
 from routes.employee_routes import employee_bp
 from routes.mongo_routes import mongo_bp
 from routes.analytics_routes import analytics_bp
+from routes.mongo_analytics_routes import mongo_analytics_bp  # ✅ new
 
 app.register_blueprint(employee_bp, url_prefix="/employees")
 app.register_blueprint(mongo_bp, url_prefix="/personnel")
 app.register_blueprint(analytics_bp, url_prefix="/analytics")
+app.register_blueprint(mongo_analytics_bp, url_prefix="/mongo-analytics")  # ✅ new
 
-# Home Page
+# ✅ Home Page
 @app.route("/")
 def home():
     return render_template("index.html")
 
-# Run App
+# Run the App
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")
