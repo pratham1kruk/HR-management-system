@@ -1,14 +1,14 @@
 -- =============================
--- professional_info.sql
--- (Only analytics, triggers, views, functions)
+-- REWRITTEN professional_info.sql
+-- With updated column names and derived experience
 -- =============================
 
 -- 🔁 Trigger Function: Log salary updates
 CREATE OR REPLACE FUNCTION log_salary_update() RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW.salary <> OLD.salary THEN
+    IF NEW.current_salary <> OLD.current_salary THEN
         INSERT INTO salary_log (emp_id, old_salary, new_salary)
-        VALUES (OLD.emp_id, OLD.salary, NEW.salary);
+        VALUES (OLD.emp_id, OLD.current_salary, NEW.current_salary);
     END IF;
     RETURN NEW;
 END;
@@ -25,7 +25,7 @@ EXECUTE FUNCTION log_salary_update();
 CREATE OR REPLACE FUNCTION log_professional_delete() RETURNS TRIGGER AS $$
 BEGIN
     INSERT INTO salary_log(emp_id, old_salary, new_salary, action, deleted_at)
-    VALUES (OLD.emp_id, OLD.salary, NULL, 'delete', NOW());
+    VALUES (OLD.emp_id, OLD.current_salary, NULL, 'delete', NOW());
     RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
@@ -40,7 +40,7 @@ EXECUTE FUNCTION log_professional_delete();
 -- 🔧 Function: Return highest salary
 CREATE OR REPLACE FUNCTION get_highest_salary() RETURNS NUMERIC AS $$
 BEGIN
-    RETURN (SELECT MAX(salary) FROM professional_info);
+    RETURN (SELECT MAX(current_salary) FROM professional_info);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -54,10 +54,12 @@ $$ LANGUAGE plpgsql;
 -- 📊 View: Employees with >3 years experience
 CREATE OR REPLACE VIEW experienced_employees AS
 SELECT e.emp_id, CONCAT(e.first_name, ' ', e.last_name) AS name, 
-       p.designation, p.experience, p.salary
+       p.designation, 
+       DATE_PART('year', AGE(e.hire_date)) AS experience,
+       p.current_salary AS salary
 FROM employee e
 JOIN professional_info p ON e.emp_id = p.emp_id
-WHERE p.experience > 3;
+WHERE DATE_PART('year', AGE(e.hire_date)) > 3;
 
 -- 📊 View: Low performers (rating ≤ 2)
 CREATE OR REPLACE VIEW low_performers AS
@@ -71,7 +73,7 @@ WHERE pi.performance_rating <= 2;
 CREATE OR REPLACE VIEW top_earners_per_department AS
 SELECT *
 FROM (
-    SELECT *, RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS dept_rank
+    SELECT *, RANK() OVER (PARTITION BY department ORDER BY current_salary DESC) AS dept_rank
     FROM professional_info
 ) sub
 WHERE dept_rank = 1;
@@ -82,15 +84,15 @@ SELECT CONCAT(e.first_name, ' ', e.last_name) AS name, pi.emp_id,
        pi.designation, pi.performance_rating
 FROM professional_info pi
 JOIN employee e ON e.emp_id = pi.emp_id
-WHERE pi.performance_rating >= 4 AND pi.salary < 70000;
+WHERE pi.performance_rating >= 4 AND pi.current_salary < 70000;
 
 -- 📊 CTE: Departments with avg salary above overall avg
 WITH dept_avg AS (
-    SELECT department, AVG(salary) AS dept_avg_salary
+    SELECT department, AVG(current_salary) AS dept_avg_salary
     FROM professional_info
     GROUP BY department
 ), overall_avg AS (
-    SELECT AVG(salary) AS overall_salary
+    SELECT AVG(current_salary) AS overall_salary
     FROM professional_info
 )
 SELECT d.*
@@ -98,29 +100,29 @@ FROM dept_avg d, overall_avg o
 WHERE d.dept_avg_salary > o.overall_salary;
 
 -- 🎯 CASE statement usage
-SELECT emp_id, department, salary,
+SELECT emp_id, department, current_salary,
     CASE 
-        WHEN salary > 70000 THEN 'High'
-        WHEN salary BETWEEN 50000 AND 70000 THEN 'Medium'
+        WHEN current_salary > 70000 THEN 'High'
+        WHEN current_salary BETWEEN 50000 AND 70000 THEN 'Medium'
         ELSE 'Low'
     END AS salary_grade
 FROM professional_info;
 
 -- ⏪ LEAD & LAG salary
-SELECT emp_id, salary, last_increment,
-       LAG(salary) OVER (ORDER BY emp_id) AS previous_salary,
-       LEAD(salary) OVER (ORDER BY emp_id) AS next_salary
+SELECT emp_id, current_salary, last_increment,
+       LAG(current_salary) OVER (ORDER BY emp_id) AS previous_salary,
+       LEAD(current_salary) OVER (ORDER BY emp_id) AS next_salary
 FROM professional_info;
 
 -- 🏆 RANK employees by salary
-SELECT emp_id, salary,
-       RANK() OVER (ORDER BY salary DESC) AS salary_rank
+SELECT emp_id, current_salary,
+       RANK() OVER (ORDER BY current_salary DESC) AS salary_rank
 FROM professional_info;
 
 -- 📈 Running salary SUM & AVG
-SELECT emp_id, salary,
-       SUM(salary) OVER (ORDER BY emp_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_salary_sum,
-       AVG(salary) OVER (ORDER BY emp_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_salary_avg
+SELECT emp_id, current_salary,
+       SUM(current_salary) OVER (ORDER BY emp_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_salary_sum,
+       AVG(current_salary) OVER (ORDER BY emp_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_salary_avg
 FROM professional_info;
 
 -- 🔁 Upsert Function
@@ -128,21 +130,21 @@ CREATE OR REPLACE FUNCTION upsert_professional_info(
     p_emp_id INT,
     p_department VARCHAR,
     p_designation VARCHAR,
-    p_experience INT,
-    p_salary NUMERIC,
+    p_current_salary NUMERIC,
+    p_previous_salary NUMERIC,
     p_last_increment NUMERIC,
     p_skills TEXT[],
-    p_rating INT
+    p_rating FLOAT
 )
 RETURNS TEXT AS $$
 BEGIN
-    INSERT INTO professional_info (emp_id, department, designation, experience, salary, last_increment, skills, performance_rating)
-    VALUES (p_emp_id, p_department, p_designation, p_experience, p_salary, p_last_increment, p_skills, p_rating)
+    INSERT INTO professional_info (emp_id, department, designation, current_salary, previous_salary, last_increment, skills, performance_rating)
+    VALUES (p_emp_id, p_department, p_designation, p_current_salary, p_previous_salary, p_last_increment, p_skills, p_rating)
     ON CONFLICT (emp_id) DO UPDATE
     SET department = EXCLUDED.department,
         designation = EXCLUDED.designation,
-        experience = EXCLUDED.experience,
-        salary = EXCLUDED.salary,
+        current_salary = EXCLUDED.current_salary,
+        previous_salary = EXCLUDED.previous_salary,
         last_increment = EXCLUDED.last_increment,
         skills = EXCLUDED.skills,
         performance_rating = EXCLUDED.performance_rating;
@@ -161,8 +163,9 @@ RETURNS TEXT AS $$
 BEGIN
     UPDATE professional_info
     SET designation = new_designation,
-        salary = salary + salary_raise,
-        last_increment = salary_raise
+        current_salary = current_salary + salary_raise,
+        last_increment = salary_raise,
+        previous_salary = current_salary
     WHERE emp_id = p_emp_id;
 
     IF FOUND THEN
@@ -176,4 +179,4 @@ $$ LANGUAGE plpgsql;
 -- 📈 Indexes
 CREATE INDEX IF NOT EXISTS idx_department ON professional_info(department);
 CREATE INDEX IF NOT EXISTS idx_rating ON professional_info(performance_rating);
-CREATE INDEX IF NOT EXISTS idx_salary ON professional_info(salary);
+CREATE INDEX IF NOT EXISTS idx_current_salary ON professional_info(current_salary);
