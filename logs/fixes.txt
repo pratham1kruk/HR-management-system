@@ -18,3 +18,6 @@ checkpoint 4 complete , session 2 completed
 
 Session 3 starts
 checkpoint 5 started
+
+ckp 5 over
+checkpoint6 started
