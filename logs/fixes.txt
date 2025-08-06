@@ -14,3 +14,7 @@ checkpoint 3 , complete session 1 over
 
 Session 2 starts
 checkpoint 4 started
+checkpoint 4 complete , session 2 completed
+
+Session 3 starts
+checkpoint 5 started
