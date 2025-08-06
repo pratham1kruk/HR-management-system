@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template
-from db.mongo_connection import get_personnel_collection
+from models.mongo_models import get_personnel_collection
 
 mongo_analytics_bp = Blueprint("mongo_analytics", __name__, url_prefix="/mongo-analytics")
 
