@@ -21,3 +21,6 @@ checkpoint 5 started
 
 ckp 5 over
 checkpoint6 started
+
+ckp 6 over 
+checkpoint 7 started
