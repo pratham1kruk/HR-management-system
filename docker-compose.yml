@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   web:
     build:
@@ -13,7 +15,7 @@ services:
     depends_on:
       - postgres
       - mongo
-    restart: always  # Optional but good for dev
+    restart: always
     command: gunicorn app:app --chdir /app --bind 0.0.0.0:5000
 
   postgres:
@@ -42,6 +44,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-example}
     volumes:
       - mongo_data:/data/db
+      - ./db_init:/data/db_init  # ✅ Mount personnel_info.json for import
 
 volumes:
   pgdata:
