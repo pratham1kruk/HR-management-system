@@ -90,45 +90,44 @@
 
   <!-- JS -->
   <script>
-    function addQualificationField() {
-      const container = document.getElementById('qualificationFields');
-      const div = document.createElement('div');
-      div.className = 'mb-3 qualification-entry';
-      div.innerHTML = `
-        <label class="form-label">Qualification</label>
-        <select name="qualification[]" class="form-select qualification-select" onchange="toggleCustomInput(this)" required>
-          <option value="">-- Select Qualification --</option>
-          <option value="B.Tech">B.Tech</option>
-          <option value="M.Tech">M.Tech</option>
-          <option value="MBA">MBA</option>
-          <option value="BCA">BCA</option>
-          <option value="MCA">MCA</option>
-          <option value="B.Sc">B.Sc</option>
-          <option value="M.Sc">M.Sc</option>
-          <option value="PhD">PhD</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" class="form-control custom-input d-none" placeholder="Enter custom qualification" name="qualification[]" />
-      `;
-      container.appendChild(div);
-    }
+  function addQualificationField() {
+    const container = document.getElementById('qualificationFields');
+    const div = document.createElement('div');
+    div.className = 'mb-3 qualification-entry';
+    div.innerHTML = `
+      <label class="form-label">Qualification</label>
+      <select class="form-select qualification-select" onchange="toggleCustomInput(this)" required>
+        <option value="">-- Select Qualification --</option>
+        <option value="B.Tech">B.Tech</option>
+        <option value="M.Tech">M.Tech</option>
+        <option value="MBA">MBA</option>
+        <option value="BCA">BCA</option>
+        <option value="MCA">MCA</option>
+        <option value="B.Sc">B.Sc</option>
+        <option value="M.Sc">M.Sc</option>
+        <option value="PhD">PhD</option>
+        <option value="Other">Other</option>
+      </select>
+      <input type="text" class="form-control custom-input d-none mt-2" placeholder="Enter custom qualification" />
+    `;
+    container.appendChild(div);
+  }
 
-    function toggleCustomInput(selectElement) {
-      const wrapper = selectElement.closest('.qualification-entry');
-      const customInput = wrapper.querySelector('.custom-input');
+  function toggleCustomInput(selectElement) {
+    const wrapper = selectElement.closest('.qualification-entry');
+    const customInput = wrapper.querySelector('.custom-input');
 
-      if (selectElement.value === "Other") {
-        selectElement.name = "ignore[]";  // Prevents submitting this select's value
-        customInput.classList.remove("d-none");
-        customInput.required = true;
-      } else {
-        selectElement.name = "qualification[]";  // Restore name for normal options
-        customInput.classList.add("d-none");
-        customInput.value = "";
-        customInput.required = false;
-      }
+    if (selectElement.value === "Other") {
+      // Hide select and enable input
+      selectElement.classList.add("d-none");
+      selectElement.required = false;
+      customInput.classList.remove("d-none");
+      customInput.name = "qualification[]";
+      customInput.required = true;
+      customInput.focus();
     }
-  </script>
+  }
+</script>
 
 </body>
 </html>
