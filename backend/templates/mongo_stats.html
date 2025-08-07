@@ -35,10 +35,10 @@
           </tr>
         </thead>
         <tbody>
-          {% for qualification, count in qualification_data %}
+          {% for q in qualification_data %}
           <tr>
-            <td>{{ qualification }}</td>
-            <td>{{ count }}</td>
+            <td>{{ q._id }}</td>
+            <td>{{ q.count }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -60,10 +60,10 @@
           </tr>
         </thead>
         <tbody>
-          {% for city, count in city_data %}
+          {% for city in city_data %}
           <tr>
-            <td>{{ city }}</td>
-            <td>{{ count }}</td>
+            <td>{{ city._id or "Unknown" }}</td>
+            <td>{{ city.count }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -85,35 +85,10 @@
           </tr>
         </thead>
         <tbody>
-          {% for state, count in state_data %}
+          {% for state in state_data %}
           <tr>
-            <td>{{ state }}</td>
-            <td>{{ count }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p class="text-muted">No data available.</p>
-    {% endif %}
-  </div>
-
-  <!-- Blood Group -->
-  <div class="mb-5">
-    <h4>🩸 Blood Group Distribution</h4>
-    {% if blood_data %}
-      <table class="table table-bordered">
-        <thead class="table-light">
-          <tr>
-            <th>Blood Group</th>
-            <th>Count</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for bg, count in blood_data %}
-          <tr>
-            <td>{{ bg }}</td>
-            <td>{{ count }}</td>
+            <td>{{ state._id or "Unknown" }}</td>
+            <td>{{ state.count }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -126,27 +101,10 @@
   <!-- Gender Distribution -->
   <div class="mb-5">
     <h4>🚻 Gender Distribution</h4>
-    {% if gender_data %}
-      <table class="table table-bordered">
-        <thead class="table-light">
-          <tr>
-            <th>Gender</th>
-            <th>Count</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for gender, count in gender_data %}
-          <tr>
-            <td>{{ gender }}</td>
-            <td>{{ count }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p class="text-muted">No data available.</p>
-    {% endif %}
-  </div>
-
-</body>
-</html>
+    <table class="table table-bordered">
+      <thead class="table-light">
+        <tr>
+          <th>Gender</th>
+          <th>Count</th>
+          <th>Percentage</th>
+        </tr>
