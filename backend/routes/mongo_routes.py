@@ -4,9 +4,11 @@ from app import mongo
 
 mongo_bp = Blueprint('mongo', __name__, url_prefix='/personnel')
 
+
 @mongo_bp.route('/home')
 def personnel_home():
     return render_template('personnel_home.html')
+
 
 # ─────────────────────────────
 # 1. List all personnel
@@ -15,6 +17,7 @@ def personnel_home():
 def list_personnel():
     personnel = list(mongo.db.employees_info.find())
     return render_template('personnel_info.html', personnel=personnel)
+
 
 # ─────────────────────────────
 # 2. Add new personnel
@@ -51,8 +54,8 @@ def add_personnel():
             }
         }
 
-        # Optional: handle dependents dynamically (simplified for now)
-        for i in range(1, 4):
+        # Optional dependents loop
+        for i in range(1, 6):
             dep_name = request.form.get(f"dep_name_{i}")
             dep_relation = request.form.get(f"dep_relation_{i}")
             dep_age = request.form.get(f"dep_age_{i}")
@@ -67,6 +70,7 @@ def add_personnel():
         return redirect(url_for('mongo.list_personnel'))
 
     return render_template('personnel_form.html', action="Add", data={})
+
 
 # ─────────────────────────────
 # 3. Update personnel
@@ -112,7 +116,7 @@ def update_personnel(id):
             }
         }
 
-        for i in range(1, 4):
+        for i in range(1, 6):
             dep_name = request.form.get(f"dep_name_{i}")
             dep_relation = request.form.get(f"dep_relation_{i}")
             dep_age = request.form.get(f"dep_age_{i}")
@@ -128,6 +132,7 @@ def update_personnel(id):
 
     return render_template('personnel_form.html', action="Update", data=existing)
 
+
 # ─────────────────────────────
 # 4. Delete personnel
 # ─────────────────────────────
@@ -138,6 +143,7 @@ def delete_personnel(id):
     except Exception:
         return "Invalid ID", 400
     return redirect(url_for('mongo.list_personnel'))
+
 
 # ─────────────────────────────
 # 5. View single personnel JSON
@@ -155,8 +161,9 @@ def view_personnel(id):
     person["_id"] = str(person["_id"])
     return jsonify(person)
 
+
 # ─────────────────────────────
-# 6. Pipeline: count by blood group
+# 6. Blood Group Pipeline View
 # ─────────────────────────────
 @mongo_bp.route('/analytics/bloodgroup-count')
 def bloodgroup_counts():
@@ -165,7 +172,13 @@ def bloodgroup_counts():
         {"$sort": {"count": -1}}
     ]
     results = list(mongo.db.employees_info.aggregate(pipeline))
-    return render_template("stats.html", title="Count by Blood Group", data=[(r["_id"], r["count"]) for r in results], label1="Blood Group", label2="Count")
+    return render_template(
+        "stats.html",
+        title="Count by Blood Group",
+        data=[(r["_id"], r["count"]) for r in results],
+        label1="Blood Group", label2="Count"
+    )
+
 
 # ─────────────────────────────
 # 7. Add Qualification & Experience
