@@ -20,14 +20,14 @@ def mongo_stats():
 
     # 3. City-wise Count
     city_pipeline = [
-        {"$group": {"_id": "$city", "count": {"$sum": 1}}},
+        {"$group": {"_id": "$residence.city", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}}
     ]
     city_data = list(collection.aggregate(city_pipeline))
 
     # 4. State-wise Count
     state_pipeline = [
-        {"$group": {"_id": "$state", "count": {"$sum": 1}}},
+        {"$group": {"_id": "$residence.state", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}}
     ]
     state_data = list(collection.aggregate(state_pipeline))
@@ -48,7 +48,7 @@ def mongo_stats():
         {"$group": {
             "_id": "$blood_group",
             "count": {"$sum": 1},
-            "emp_ids": {"$push": {"id": "$_id", "name": "$name"}}
+            "employee_ids": {"$push": "$employee_id"}
         }},
         {"$sort": {"count": -1}}
     ]
