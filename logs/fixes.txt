@@ -24,3 +24,11 @@ checkpoint6 started
 
 ckp 6 over 
 checkpoint 7 started
+
+ckp7 over
+
+session 3 over 
+# all tabs and connections are completely running base complete
+
+session 4 - bugfixes
+ckp 8 start
