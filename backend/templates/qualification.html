@@ -38,7 +38,8 @@
     <div class="form-section">
       <h2><i class="bi bi-award-fill text-info"></i> Add Qualification Info</h2>
 
-      <form action="/qualification/submit" method="POST" id="qualificationForm">
+      <!-- ✅ FIXED FORM ACTION -->
+      <form method="POST" action="{{ url_for('mongo.add_qualification') }}" id="qualificationForm">
 
         <!-- Employee ID -->
         <div class="mb-3">
@@ -78,10 +79,10 @@
           </button>
         </div>
 
-        <!-- Past Experience -->
+        <!-- Experience Section -->
         <div class="mb-4">
           <label for="experience" class="form-label">Past Experience</label>
-          <textarea name="experience" id="experience" class="form-control" rows="4" placeholder="List relevant experience..."></textarea>
+          <textarea name="experience[]" id="experience" class="form-control" rows="4" placeholder="List relevant experience..."></textarea>
         </div>
 
         <!-- Submit -->
