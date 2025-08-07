@@ -166,3 +166,29 @@ def bloodgroup_counts():
     ]
     results = list(mongo.db.employees_info.aggregate(pipeline))
     return render_template("stats.html", title="Count by Blood Group", data=[(r["_id"], r["count"]) for r in results], label1="Blood Group", label2="Count")
+
+# ─────────────────────────────
+# 7. Add Qualification & Experience
+# ─────────────────────────────
+@mongo_bp.route('/add-qualification', methods=['GET', 'POST'])
+def add_qualification():
+    if request.method == 'POST':
+        emp_id = request.form.get("employee_id")
+        name = request.form.get("name")
+        qualifications = request.form.getlist("qualification[]")
+        experiences = request.form.getlist("experience[]")
+
+        if not emp_id:
+            return "Employee ID is required", 400
+
+        data = {
+            "employee_id": emp_id,
+            "name": name,
+            "qualifications": qualifications,
+            "experiences": experiences
+        }
+
+        mongo.db.qualifications.insert_one(data)
+        return redirect(url_for('mongo.list_personnel'))
+
+    return render_template("qualification.html")
