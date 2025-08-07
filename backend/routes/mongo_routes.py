@@ -5,13 +5,16 @@ from app import mongo
 mongo_bp = Blueprint('mongo', __name__, url_prefix='/personnel')
 
 
+# ─────────────────────────────
+# 0. Home
+# ─────────────────────────────
 @mongo_bp.route('/home')
 def personnel_home():
     return render_template('personnel_home.html')
 
 
 # ─────────────────────────────
-# 1. List all personnel
+# 1. List All Personnel
 # ─────────────────────────────
 @mongo_bp.route('/')
 def list_personnel():
@@ -20,18 +23,19 @@ def list_personnel():
 
 
 # ─────────────────────────────
-# 2. Add new personnel
+# 2. Add Personnel
 # ─────────────────────────────
 @mongo_bp.route('/add', methods=['GET', 'POST'])
 def add_personnel():
     if request.method == 'POST':
+        gender = request.form.get("gender", "").strip().capitalize()
         data = {
             "employee_id": request.form.get("employee_id"),
             "name": request.form.get("name"),
             "aadhaar": request.form.get("aadhaar"),
             "pan": request.form.get("pan"),
             "dob": request.form.get("dob"),
-            "gender": request.form.get("gender"),
+            "gender": gender,
             "blood_group": request.form.get("blood_group"),
             "residence": {
                 "address": request.form.get("address"),
@@ -54,7 +58,6 @@ def add_personnel():
             }
         }
 
-        # Optional dependents loop
         for i in range(1, 6):
             dep_name = request.form.get(f"dep_name_{i}")
             dep_relation = request.form.get(f"dep_relation_{i}")
@@ -73,7 +76,7 @@ def add_personnel():
 
 
 # ─────────────────────────────
-# 3. Update personnel
+# 3. Update Personnel
 # ─────────────────────────────
 @mongo_bp.route('/update/<id>', methods=['GET', 'POST'])
 def update_personnel(id):
@@ -87,13 +90,14 @@ def update_personnel(id):
         return "Record not found", 404
 
     if request.method == 'POST':
+        gender = request.form.get("gender", "").strip().capitalize()
         updated = {
             "employee_id": request.form.get("employee_id"),
             "name": request.form.get("name"),
             "aadhaar": request.form.get("aadhaar"),
             "pan": request.form.get("pan"),
             "dob": request.form.get("dob"),
-            "gender": request.form.get("gender"),
+            "gender": gender,
             "blood_group": request.form.get("blood_group"),
             "residence": {
                 "address": request.form.get("address"),
@@ -134,7 +138,7 @@ def update_personnel(id):
 
 
 # ─────────────────────────────
-# 4. Delete personnel
+# 4. Delete Personnel
 # ─────────────────────────────
 @mongo_bp.route('/delete/<id>', methods=['GET'])
 def delete_personnel(id):
@@ -146,7 +150,7 @@ def delete_personnel(id):
 
 
 # ─────────────────────────────
-# 5. View single personnel JSON
+# 5. View Single Personnel (JSON)
 # ─────────────────────────────
 @mongo_bp.route('/<id>', methods=['GET'])
 def view_personnel(id):
@@ -163,7 +167,7 @@ def view_personnel(id):
 
 
 # ─────────────────────────────
-# 6. Blood Group Pipeline View
+# 6. Blood Group Stats View
 # ─────────────────────────────
 @mongo_bp.route('/analytics/bloodgroup-count')
 def bloodgroup_counts():
@@ -194,9 +198,13 @@ def add_qualification():
         if not emp_id:
             return "Employee ID is required", 400
 
+        # Clean out empty entries
+        qualifications = [q for q in qualifications if q.strip()]
+        experiences = [e for e in experiences if e.strip()]
+
         data = {
-            "employee_id": emp_id,
-            "name": name,
+            "employee_id": emp_id.strip(),
+            "name": name.strip() if name else "",
             "qualifications": qualifications,
             "experiences": experiences
         }
