@@ -3,6 +3,11 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
+@property
+def full_name(self):
+    return f"{self.first_name} {self.last_name}".strip()
+
+
 class Employee(db.Model):
     __tablename__ = 'employee'
 
