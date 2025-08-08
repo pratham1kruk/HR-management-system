@@ -32,3 +32,6 @@ session 3 over
 
 session 4 - bugfixes
 ckp 8 start
+
+ckp 8 over
+ckp 9 started
