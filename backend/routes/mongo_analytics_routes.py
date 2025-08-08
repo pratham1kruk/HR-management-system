@@ -78,12 +78,13 @@ def mongo_stats():
             search_results = []
 
     return render_template(
-        "mongo_stats.html",
-        missing_pan_data=missing_pan_data,
-        qualification_data=qualification_data,
-        city_data=city_data,
-        state_data=state_data,
-        gender_stats=gender_stats,
-        blood_data=blood_data,
-        search_results=search_results
-    )
+    "mongo_stats.html",
+    missing_pan_data=missing_pan_data,
+    qualification_data=qualification_data,
+    city_data=city_data,
+    state_data=state_data,
+    gender_stats=gender_stats,
+    blood_data=blood_data,
+    search_results=search_results,
+    total_personnel=total_employees   # ✅ FIX: pass this to the template
+)
