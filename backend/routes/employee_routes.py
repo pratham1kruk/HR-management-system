@@ -4,26 +4,28 @@ from datetime import datetime
 
 employee_bp = Blueprint("employee", __name__, url_prefix="/employees")
 
-# ─────────────────────────────
-# EMPLOYEE HOME MENU
-# ─────────────────────────────
+
+# Employee home menu
 @employee_bp.route("/home")
 def employee_home():
     return render_template("employee_home.html")
 
-# ─────────────────────────────
-# LIST EMPLOYEES: GENERAL + PROFESSIONAL INFO
-# ─────────────────────────────
+
+# Original list (unchanged for safety)
 @employee_bp.route("/")
 def list_employees():
     employees = Employee.query.all()
-    professional_info = ProfessionalInfo.query.all()
-    prof_dict = {p.emp_id: p for p in professional_info}
-    return render_template("employee_list.html", employees=employees, professional_info=prof_dict)
+    return render_template("employee_list.html", employees=employees)
 
-# ─────────────────────────────
-# ADD: BASIC GENERAL INFO
-# ─────────────────────────────
+
+# NEW: Tabbed View for General + Professional Info
+@employee_bp.route("/tabbed")
+def list_employees_tabbed():
+    employees = Employee.query.outerjoin(ProfessionalInfo).all()
+    return render_template("employee_tabbed.html", employees=employees)
+
+
+# Add basic general info
 @employee_bp.route("/new", methods=["GET", "POST"])
 def add_employee():
     if request.method == "POST":
@@ -42,9 +44,8 @@ def add_employee():
         return redirect(url_for("employee.list_employees"))
     return render_template("employee_form.html")
 
-# ─────────────────────────────
-# ADD: PROFESSIONAL INFO
-# ─────────────────────────────
+
+# Add professional info
 @employee_bp.route("/professional", methods=["GET", "POST"])
 def add_professional_info():
     if request.method == "POST":
@@ -71,9 +72,8 @@ def add_professional_info():
     emp_id = request.args.get("emp_id", type=int)
     return render_template("professional_form.html", emp_id=emp_id)
 
-# ─────────────────────────────
-# EDIT: GENERAL INFO
-# ─────────────────────────────
+
+# Edit general info
 @employee_bp.route("/edit/<int:emp_id>", methods=["GET", "POST"])
 def edit_employee(emp_id):
     emp = Employee.query.get_or_404(emp_id)
@@ -90,9 +90,8 @@ def edit_employee(emp_id):
         return redirect(url_for("employee.list_employees"))
     return render_template("employee_form.html", employee=emp)
 
-# ─────────────────────────────
-# EDIT: PROFESSIONAL INFO
-# ─────────────────────────────
+
+# Edit professional info
 @employee_bp.route("/edit/professional/<int:emp_id>", methods=["GET", "POST"])
 def edit_professional(emp_id):
     prof = ProfessionalInfo.query.filter_by(emp_id=emp_id).first()
@@ -114,14 +113,10 @@ def edit_professional(emp_id):
 
     return render_template("professional_form.html", professional=prof, emp_id=emp_id)
 
-# ─────────────────────────────
-# DELETE EMPLOYEE + PROFESSIONAL INFO
-# ─────────────────────────────
+
+# Delete employee + professional info
 @employee_bp.route("/delete/<int:emp_id>", methods=["POST"])
 def delete_employee(emp_id):
-    prof = ProfessionalInfo.query.filter_by(emp_id=emp_id).first()
-    if prof:
-        db.session.delete(prof)
     emp = Employee.query.get_or_404(emp_id)
     db.session.delete(emp)
     db.session.commit()

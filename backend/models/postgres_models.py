@@ -15,7 +15,7 @@ class Employee(db.Model):
     phone = db.Column(db.String(20))
     hire_date = db.Column(db.Date, default=datetime.utcnow)
 
-    # Relationship to ProfessionalInfo
+    # One-to-one relationship with ProfessionalInfo
     professional = db.relationship(
         "ProfessionalInfo",
         backref=db.backref("employee", lazy=True),
@@ -25,20 +25,24 @@ class Employee(db.Model):
 
     @property
     def full_name(self):
-        """Return full name safely"""
+        """Return combined first and last name"""
         return f"{self.first_name or ''} {self.last_name or ''}".strip()
 
 
 class ProfessionalInfo(db.Model):
     __tablename__ = 'professional_info'
 
-    emp_id = db.Column(db.Integer, db.ForeignKey('employee.emp_id', ondelete="CASCADE"), primary_key=True)
+    emp_id = db.Column(
+        db.Integer,
+        db.ForeignKey('employee.emp_id', ondelete="CASCADE"),
+        primary_key=True
+    )
     designation = db.Column(db.String(100))
     department = db.Column(db.String(100))
     current_salary = db.Column(db.Numeric(10, 2))
     previous_salary = db.Column(db.Numeric(10, 2))
     last_increment = db.Column(db.Numeric(10, 2))
-    skills = db.Column(db.ARRAY(db.Text))  # Could change to JSON if preferred
+    skills = db.Column(db.ARRAY(db.Text))
     performance_rating = db.Column(db.Float)
 
 
