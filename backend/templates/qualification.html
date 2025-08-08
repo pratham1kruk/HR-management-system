@@ -1,4 +1,4 @@
-<!-- Inside qualification.html -->
+<!-- qualification.html (Improved) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,105 +28,135 @@
 </head>
 <body class="py-5">
 
-  <div class="container">
-    <div class="form-section">
-      <h2><i class="bi bi-award-fill text-info"></i> Add Qualification Info</h2>
+<div class="container">
+  <div class="form-section">
+    <h2><i class="bi bi-award-fill text-info"></i> Add Qualification Info</h2>
 
-      <form method="POST" action="{{ url_for('mongo.add_qualification') }}" id="qualificationForm">
+    <form method="POST" action="{{ url_for('mongo.add_qualification') }}" id="qualificationForm">
 
-        <!-- Employee ID -->
-        <div class="mb-3">
-          <label for="employee_id" class="form-label">Employee ID</label>
-          <input type="text" class="form-control" id="employee_id" name="employee_id" required>
-        </div>
+      <!-- Employee ID -->
+      <div class="mb-3">
+        <label for="employee_id" class="form-label">Employee ID</label>
+        <input type="text" class="form-control" id="employee_id" name="employee_id" required>
+      </div>
 
-        <!-- Employee Name -->
-        <div class="mb-3">
-          <label for="name" class="form-label">Employee Name (optional)</label>
-          <input type="text" class="form-control" id="name" name="name">
-        </div>
+      <!-- Employee Name -->
+      <div class="mb-3">
+        <label for="name" class="form-label">Employee Name (optional)</label>
+        <input type="text" class="form-control" id="name" name="name">
+      </div>
 
-        <!-- Qualification Fields -->
-        <div id="qualificationFields">
-          <div class="mb-3 qualification-entry">
-            <label class="form-label">Qualification</label>
-            <select name="qualification[]" class="form-select qualification-select" onchange="toggleCustomInput(this)" required>
-              <option value="">-- Select Qualification --</option>
-              <option value="B.Tech">B.Tech</option>
-              <option value="M.Tech">M.Tech</option>
-              <option value="MBA">MBA</option>
-              <option value="BCA">BCA</option>
-              <option value="MCA">MCA</option>
-              <option value="B.Sc">B.Sc</option>
-              <option value="M.Sc">M.Sc</option>
-              <option value="PhD">PhD</option>
-              <option value="Other">Other</option>
-            </select>
-            <!-- Hidden input for custom qualification -->
-            <input type="text" class="form-control custom-input d-none" placeholder="Enter custom qualification" name="qualification[]" />
-          </div>
-        </div>
-
-        <!-- Add More Button -->
-        <div class="mb-3 text-end">
-          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addQualificationField()">
-            <i class="bi bi-plus-circle"></i> Add Another Qualification
+      <!-- Qualification Fields -->
+      <div id="qualificationFields">
+        <div class="mb-3 qualification-entry">
+          <label class="form-label">Qualification</label>
+          <select name="qualification[]" class="form-select qualification-select" onchange="toggleCustomInput(this)">
+            <option value="">-- Select Qualification --</option>
+            <option value="B.Tech">B.Tech</option>
+            <option value="M.Tech">M.Tech</option>
+            <option value="MBA">MBA</option>
+            <option value="BCA">BCA</option>
+            <option value="MCA">MCA</option>
+            <option value="B.Sc">B.Sc</option>
+            <option value="M.Sc">M.Sc</option>
+            <option value="PhD">PhD</option>
+            <option value="Other">Other</option>
+          </select>
+          <!-- Hidden input for custom qualification -->
+          <input type="text" class="form-control custom-input d-none" placeholder="Enter custom qualification" />
+          <button type="button" class="btn btn-sm btn-outline-danger mt-2 remove-btn d-none" onclick="removeQualificationField(this)">
+            <i class="bi bi-trash"></i> Remove
           </button>
         </div>
+      </div>
 
-        <!-- Experience -->
-        <div class="mb-4">
-          <label for="experience" class="form-label">Past Experience</label>
-          <textarea name="experience[]" id="experience" class="form-control" rows="4" placeholder="List relevant experience..."></textarea>
-        </div>
+      <!-- Add More Button -->
+      <div class="mb-3 text-end">
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addQualificationField()">
+          <i class="bi bi-plus-circle"></i> Add Another Qualification
+        </button>
+      </div>
 
-        <div class="d-grid">
-          <button type="submit" class="btn btn-info btn-lg">Submit Qualification Info</button>
-        </div>
+      <!-- Experience -->
+      <div class="mb-4">
+        <label for="experience" class="form-label">Past Experience</label>
+        <textarea name="experience[]" id="experience" class="form-control" rows="4" placeholder="List relevant experience..."></textarea>
+      </div>
 
-      </form>
-    </div>
+      <div class="d-grid">
+        <button type="submit" class="btn btn-info btn-lg">Submit Qualification Info</button>
+      </div>
+
+    </form>
   </div>
+</div>
 
-  <!-- JS -->
-  <script>
-  function addQualificationField() {
-    const container = document.getElementById('qualificationFields');
-    const div = document.createElement('div');
-    div.className = 'mb-3 qualification-entry';
-    div.innerHTML = `
-      <label class="form-label">Qualification</label>
-      <select class="form-select qualification-select" onchange="toggleCustomInput(this)" required>
-        <option value="">-- Select Qualification --</option>
-        <option value="B.Tech">B.Tech</option>
-        <option value="M.Tech">M.Tech</option>
-        <option value="MBA">MBA</option>
-        <option value="BCA">BCA</option>
-        <option value="MCA">MCA</option>
-        <option value="B.Sc">B.Sc</option>
-        <option value="M.Sc">M.Sc</option>
-        <option value="PhD">PhD</option>
-        <option value="Other">Other</option>
-      </select>
-      <input type="text" class="form-control custom-input d-none mt-2" placeholder="Enter custom qualification" />
-    `;
-    container.appendChild(div);
+<!-- JS -->
+<script>
+function addQualificationField() {
+  const container = document.getElementById('qualificationFields');
+  const div = document.createElement('div');
+  div.className = 'mb-3 qualification-entry';
+  div.innerHTML = `
+    <label class="form-label">Qualification</label>
+    <select name="qualification[]" class="form-select qualification-select" onchange="toggleCustomInput(this)">
+      <option value="">-- Select Qualification --</option>
+      <option value="B.Tech">B.Tech</option>
+      <option value="M.Tech">M.Tech</option>
+      <option value="MBA">MBA</option>
+      <option value="BCA">BCA</option>
+      <option value="MCA">MCA</option>
+      <option value="B.Sc">B.Sc</option>
+      <option value="M.Sc">M.Sc</option>
+      <option value="PhD">PhD</option>
+      <option value="Other">Other</option>
+    </select>
+    <input type="text" class="form-control custom-input d-none mt-2" placeholder="Enter custom qualification" />
+    <button type="button" class="btn btn-sm btn-outline-danger mt-2 remove-btn" onclick="removeQualificationField(this)">
+      <i class="bi bi-trash"></i> Remove
+    </button>
+  `;
+  container.appendChild(div);
+}
+
+function toggleCustomInput(selectElement) {
+  const wrapper = selectElement.closest('.qualification-entry');
+  const customInput = wrapper.querySelector('.custom-input');
+
+  if (selectElement.value === "Other") {
+    selectElement.classList.add("d-none");
+    customInput.classList.remove("d-none");
+    customInput.name = "qualification[]";
+    customInput.focus();
+  } else {
+    selectElement.classList.remove("d-none");
+    customInput.classList.add("d-none");
+    customInput.removeAttribute("name");
   }
+}
 
-  function toggleCustomInput(selectElement) {
-    const wrapper = selectElement.closest('.qualification-entry');
-    const customInput = wrapper.querySelector('.custom-input');
-
-    if (selectElement.value === "Other") {
-      // Hide select and enable input
-      selectElement.classList.add("d-none");
-      selectElement.required = false;
-      customInput.classList.remove("d-none");
-      customInput.name = "qualification[]";
-      customInput.required = true;
-      customInput.focus();
-    }
+function removeQualificationField(button) {
+  const container = document.getElementById('qualificationFields');
+  if (container.children.length > 1) {
+    button.closest('.qualification-entry').remove();
   }
+}
+
+// Ensure only at least one qualification is required
+document.getElementById('qualificationForm').addEventListener('submit', function(e) {
+  const selects = document.querySelectorAll('.qualification-select');
+  const inputs = document.querySelectorAll('.custom-input:not(.d-none)');
+
+  let hasQualification = false;
+
+  selects.forEach(sel => { if (sel.value.trim() !== "") hasQualification = true; });
+  inputs.forEach(inp => { if (inp.value.trim() !== "") hasQualification = true; });
+
+  if (!hasQualification) {
+    e.preventDefault();
+    alert("Please enter at least one qualification.");
+  }
+});
 </script>
 
 </body>
