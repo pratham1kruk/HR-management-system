@@ -109,10 +109,18 @@ SELECT emp_id, department, current_salary,
 FROM professional_info;
 
 -- ⏪ LEAD & LAG salary
-SELECT emp_id, current_salary, last_increment,
-       LAG(current_salary) OVER (ORDER BY emp_id) AS previous_salary,
-       LEAD(current_salary) OVER (ORDER BY emp_id) AS next_salary
-FROM professional_info;
+-- Salary progression using hire date order
+SELECT e.emp_id,
+       e.first_name || ' ' || e.last_name AS full_name,
+       e.hire_date,
+       p.current_salary,
+       p.last_increment,
+       LAG(p.current_salary) OVER (ORDER BY e.hire_date) AS previous_salary,
+       LEAD(p.current_salary) OVER (ORDER BY e.hire_date) AS next_salary
+FROM employee e
+JOIN professional_info p 
+     ON e.emp_id = p.emp_id
+ORDER BY e.hire_date;
 
 -- 🏆 RANK employees by salary
 SELECT emp_id, current_salary,
