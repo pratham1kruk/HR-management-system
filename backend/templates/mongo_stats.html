@@ -1,174 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>MongoDB Personnel Analytics</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <meta charset="UTF-8">
+  <title>MongoDB Personnel Analytics</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="container py-4">
 
-    <h2 class="mb-4">📊 MongoDB Personnel Analytics</h2>
+  <h2 class="mb-4">📊 MongoDB Personnel Analytics</h2>
 
-    <!-- 🔹 Search Experience by Employee ID -->
-    <div class="mb-5">
-        <h4>🔍 Search Employee Experience</h4>
-        <div class="input-group mb-3" style="max-width: 400px;">
-            <input type="text" id="searchEmpId" class="form-control" placeholder="Enter Employee ID">
-            <button class="btn btn-primary" id="searchExperience">Search</button>
-        </div>
-        <div id="experienceResult" class="border rounded p-3 bg-light" style="display: none;"></div>
+  <!-- Search Employee Experience -->
+  <div class="mb-5">
+    <h4>🔍 Search Past Experience by Employee ID</h4>
+    <div class="input-group mb-3">
+      <input type="text" id="searchEmpId" class="form-control" placeholder="Enter Employee ID">
+      <button class="btn btn-primary" onclick="searchExperience()">Search</button>
     </div>
-
-    <!-- 🔹 Missing PAN -->
-    <div class="mb-5">
-        <h4>🧾 Missing PAN Records</h4>
-        {% if missing_pan_data %}
-        <ul class="list-group">
-            {% for name, emp_id in missing_pan_data %}
-                <li class="list-group-item">{{ name }} (ID: {{ emp_id }})</li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <p class="text-muted">✅ No records missing PAN.</p>
-        {% endif %}
+    <div id="experienceResult" class="border rounded p-3 bg-light" style="display:none;">
+      <h5>Experience Details</h5>
+      <ul id="experienceList" class="list-group"></ul>
     </div>
+  </div>
 
-    <!-- 🔹 Qualification Counts Per Employee -->
-    <div class="mb-5">
-        <h4>🎓 Qualification Counts (Per Employee)</h4>
-        {% if qualification_data %}
-        <table class="table table-bordered">
-            <thead class="table-light">
-                <tr>
-                    <th>Employee ID</th>
-                    <th>Name</th>
-                    <th>Qualification Count</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for emp in qualification_data %}
-                <tr>
-                    <td>{{ emp._id }}</td>
-                    <td>{{ emp.name }}</td>
-                    <td>{{ emp.count }}</td>
-                    <td>
-                        <button class="btn btn-sm btn-info toggle-qualifications" data-quals='{{ emp.qualifications | tojson }}'>
-                            View Qualifications
-                        </button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p class="text-muted">No qualification data available.</p>
-        {% endif %}
-    </div>
+  <!-- Missing PAN -->
+  <div class="mb-5">
+    <h4>🧾 Missing PAN Records</h4>
+    {% if missing_pan_data %}
+      <ul class="list-group">
+        {% for name, id in missing_pan_data %}
+          <li class="list-group-item">{{ name }} (ID: {{ id }})</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-muted">✅ No records missing PAN.</p>
+    {% endif %}
+  </div>
 
-    <!-- 🔹 City-wise Count -->
-    <div class="mb-5">
-        <h4>🏙 City-wise Distribution</h4>
-        {% if city_data %}
-        <table class="table table-bordered">
-            <thead class="table-light">
-                <tr>
-                    <th>City</th>
-                    <th>Count</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for city in city_data %}
-                <tr>
-                    <td>{{ city._id or "Unknown" }}</td>
-                    <td>{{ city.count }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p class="text-muted">No data available.</p>
-        {% endif %}
-    </div>
+  <!-- Qualification Count Per Employee -->
+  <div class="mb-5">
+    <h4>🎓 Qualifications Per Employee</h4>
+    {% if qualification_data %}
+      <table class="table table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th>Employee ID</th>
+            <th>Name</th>
+            <th>Qualification Count</th>
+            <th>View Qualifications</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for emp in qualification_data %}
+          <tr>
+            <td>{{ emp._id }}</td>
+            <td>{{ emp.name or 'N/A' }}</td>
+            <td>{{ emp.count }}</td>
+            <td>
+              <button class="btn btn-sm btn-info" type="button" 
+                      data-bs-toggle="collapse" 
+                      data-bs-target="#qualifications-{{ emp._id }}">
+                Toggle
+              </button>
+              <div id="qualifications-{{ emp._id }}" class="collapse mt-2">
+                <ul class="list-group">
+                  {% for q in emp.qualifications %}
+                  <li class="list-group-item">{{ q }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="text-muted">No qualification data found.</p>
+    {% endif %}
+  </div>
 
-    <!-- 🔹 State-wise Count -->
-    <div class="mb-5">
-        <h4>🏞 State-wise Distribution</h4>
-        {% if state_data %}
-        <table class="table table-bordered">
-            <thead class="table-light">
-                <tr>
-                    <th>State</th>
-                    <th>Count</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for state in state_data %}
-                <tr>
-                    <td>{{ state._id or "Unknown" }}</td>
-                    <td>{{ state.count }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p class="text-muted">No data available.</p>
-        {% endif %}
-    </div>
+  <!-- City-wise Count -->
+  <div class="mb-5">
+    <h4>🏙 City-wise Distribution</h4>
+    {% if city_data %}
+      <table class="table table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th>City</th>
+            <th>Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for city in city_data %}
+          <tr>
+            <td>{{ city._id or "Unknown" }}</td>
+            <td>{{ city.count }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="text-muted">No city data available.</p>
+    {% endif %}
+  </div>
 
-    <!-- 🔹 Gender Distribution -->
-    <div class="mb-5">
-        <h4>🚻 Gender Distribution</h4>
-        {% if total_personnel > 0 %}
-        <table class="table table-bordered">
-            <thead class="table-light">
-                <tr>
-                    <th>Gender</th>
-                    <th>Count</th>
-                    <th>Percentage</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for g in gender_data %}
-                <tr>
-                    <td>{{ g._id or "Unknown" }}</td>
-                    <td>{{ g.count }}</td>
-                    <td>{{ "%.2f" | format((g.count / total_personnel) * 100) }}%</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p class="text-muted">No gender data available.</p>
-        {% endif %}
-    </div>
+  <!-- State-wise Count -->
+  <div class="mb-5">
+    <h4>🏞 State-wise Distribution</h4>
+    {% if state_data %}
+      <table class="table table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th>State</th>
+            <th>Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for state in state_data %}
+          <tr>
+            <td>{{ state._id or "Unknown" }}</td>
+            <td>{{ state.count }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="text-muted">No state data available.</p>
+    {% endif %}
+  </div>
 
-    <script>
-        // 🔍 Search Experience
-        $("#searchExperience").click(function () {
-            const empId = $("#searchEmpId").val().trim();
-            if (!empId) {
-                alert("Please enter an Employee ID");
-                return;
-            }
-            $.get(`/mongo-analytics/experience/${empId}`, function (data) {
-                if (data.experience && data.experience.length > 0) {
-                    $("#experienceResult").html("<b>Past Experience:</b><ul>" +
-                        data.experience.map(e => `<li>${e}</li>`).join('') +
-                        "</ul>").show();
-                } else {
-                    $("#experienceResult").html("<i>No experience found for this employee.</i>").show();
-                }
+  <!-- Gender Distribution -->
+  <div class="mb-5">
+    <h4>🚻 Gender Distribution</h4>
+    {% if gender_data %}
+      <table class="table table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th>Gender</th>
+            <th>Count</th>
+            <th>Percentage</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for g in gender_data %}
+          <tr>
+            <td>{{ g._id or "Unknown" }}</td>
+            <td>{{ g.count }}</td>
+            <td>{{ '%.2f' | format((g.count / total_personnel) * 100) }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="text-muted">No gender data available.</p>
+    {% endif %}
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function searchExperience() {
+      const empId = document.getElementById("searchEmpId").value.trim();
+      if (!empId) {
+        alert("Please enter an Employee ID");
+        return;
+      }
+
+      fetch(`/personnel/experience/${empId}`)
+        .then(res => res.json())
+        .then(data => {
+          const expDiv = document.getElementById("experienceResult");
+          const expList = document.getElementById("experienceList");
+          expList.innerHTML = "";
+
+          if (data && data.experience && data.experience.length > 0) {
+            data.experience.forEach(exp => {
+              const li = document.createElement("li");
+              li.classList.add("list-group-item");
+              li.textContent = exp;
+              expList.appendChild(li);
             });
+            expDiv.style.display = "block";
+          } else {
+            expDiv.style.display = "block";
+            expList.innerHTML = `<li class="list-group-item text-muted">No experience found for this Employee ID.</li>`;
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Error fetching experience data.");
         });
-
-        // 🎓 Toggle Qualifications
-        $(document).on("click", ".toggle-qualifications", function () {
-            const quals = JSON.parse($(this).attr("data-quals"));
-            alert("Qualifications:\n" + quals.join("\n"));
-        });
-    </script>
-
+    }
+  </script>
 </body>
 </html>
