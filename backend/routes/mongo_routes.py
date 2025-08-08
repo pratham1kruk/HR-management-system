@@ -4,27 +4,15 @@ from app import mongo
 
 mongo_bp = Blueprint('mongo', __name__, url_prefix='/personnel')
 
-
-# ─────────────────────────────
-# 0. Home
-# ─────────────────────────────
 @mongo_bp.route('/home')
 def personnel_home():
     return render_template('personnel_home.html')
 
-
-# ─────────────────────────────
-# 1. List All Personnel
-# ─────────────────────────────
 @mongo_bp.route('/')
 def list_personnel():
     personnel = list(mongo.db.employees_info.find())
     return render_template('personnel_info.html', personnel=personnel)
 
-
-# ─────────────────────────────
-# 2. Add Personnel
-# ─────────────────────────────
 @mongo_bp.route('/add', methods=['GET', 'POST'])
 def add_personnel():
     if request.method == 'POST':
@@ -57,7 +45,6 @@ def add_personnel():
                 "dependents": []
             }
         }
-
         for i in range(1, 6):
             dep_name = request.form.get(f"dep_name_{i}")
             dep_relation = request.form.get(f"dep_relation_{i}")
@@ -74,10 +61,6 @@ def add_personnel():
 
     return render_template('personnel_form.html', action="Add", data={})
 
-
-# ─────────────────────────────
-# 3. Update Personnel
-# ─────────────────────────────
 @mongo_bp.route('/update/<id>', methods=['GET', 'POST'])
 def update_personnel(id):
     try:
@@ -119,7 +102,6 @@ def update_personnel(id):
                 "dependents": []
             }
         }
-
         for i in range(1, 6):
             dep_name = request.form.get(f"dep_name_{i}")
             dep_relation = request.form.get(f"dep_relation_{i}")
@@ -136,10 +118,6 @@ def update_personnel(id):
 
     return render_template('personnel_form.html', action="Update", data=existing)
 
-
-# ─────────────────────────────
-# 4. Delete Personnel
-# ─────────────────────────────
 @mongo_bp.route('/delete/<id>', methods=['GET'])
 def delete_personnel(id):
     try:
@@ -148,45 +126,31 @@ def delete_personnel(id):
         return "Invalid ID", 400
     return redirect(url_for('mongo.list_personnel'))
 
-
-# ─────────────────────────────
-# 5. View Single Personnel (JSON)
-# ─────────────────────────────
 @mongo_bp.route('/<id>', methods=['GET'])
 def view_personnel(id):
     try:
         person = mongo.db.employees_info.find_one({"_id": ObjectId(id)})
     except Exception:
         return jsonify({"error": "Invalid ID format"}), 400
-
     if not person:
         return jsonify({"error": "Not found"}), 404
-
     person["_id"] = str(person["_id"])
     return jsonify(person)
 
-
-# ─────────────────────────────
-# 6. Blood Group Stats View
-# ─────────────────────────────
-@mongo_bp.route('/analytics/bloodgroup-count')
-def bloodgroup_counts():
-    pipeline = [
-        {"$group": {"_id": "$blood_group", "count": {"$sum": 1}}},
-        {"$sort": {"count": -1}}
+@mongo_bp.route('/analytics/bloodgroup/<group>')
+def bloodgroup_employees(group):
+    results = list(mongo.db.employees_info.find({"blood_group": group}))
+    employees = [
+        {
+            "employee_id": emp.get("employee_id"),
+            "name": emp.get("name"),
+            "phone": emp.get("contact", {}).get("phone"),
+            "email": emp.get("contact", {}).get("email")
+        }
+        for emp in results
     ]
-    results = list(mongo.db.employees_info.aggregate(pipeline))
-    return render_template(
-        "stats.html",
-        title="Count by Blood Group",
-        data=[(r["_id"], r["count"]) for r in results],
-        label1="Blood Group", label2="Count"
-    )
+    return jsonify(employees)
 
-
-# ─────────────────────────────
-# 7. Add Qualification & Experience
-# ─────────────────────────────
 @mongo_bp.route('/add-qualification', methods=['GET', 'POST'])
 def add_qualification():
     if request.method == 'POST':
@@ -198,7 +162,6 @@ def add_qualification():
         if not emp_id:
             return "Employee ID is required", 400
 
-        # Clean out empty entries
         qualifications = [q for q in qualifications if q.strip()]
         experiences = [e for e in experiences if e.strip()]
 
@@ -208,7 +171,6 @@ def add_qualification():
             "qualifications": qualifications,
             "experiences": experiences
         }
-
         mongo.db.qualifications.insert_one(data)
         return redirect(url_for('mongo.list_personnel'))
 
