@@ -1,34 +1,30 @@
-# routes/analytics_routes.py
-
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request, make_response
 from models.postgres_models import db
 from sqlalchemy import text
+from datetime import datetime
+import pdfkit
 
 analytics_bp = Blueprint("analytics", __name__, url_prefix="/analytics")
 
-@analytics_bp.route("/")
-def stats_home():
+# ------------------------------
+# Helper function to collect all analytics data
+# ------------------------------
+def _collect_stats():
     stats = {}
 
-    # 📊 Salary Comparison (Lead/Lag + Difference Analysis)
+    # 📊 Salary Comparison
     stats["salary_comparison"] = db.session.execute(text("""
         SELECT 
             e.emp_id,
             e.first_name || ' ' || e.last_name AS full_name,
             e.hire_date,
-            -- Salary difference for same employee
             (p.current_salary - COALESCE(p.previous_salary, 0)) AS salary_diff,
-            -- Previous employee salary (by hire date)
             LAG(p.current_salary, 1) OVER (ORDER BY e.hire_date) AS prev_emp_salary,
-            -- Current employee salary
             p.current_salary,
-            -- Next employee salary (by hire date)
             LEAD(p.current_salary, 1) OVER (ORDER BY e.hire_date) AS next_emp_salary,
-            -- Last increment
             p.last_increment
         FROM employee e
-        JOIN professional_info p 
-            ON e.emp_id = p.emp_id
+        JOIN professional_info p ON e.emp_id = p.emp_id
         ORDER BY e.hire_date
     """)).fetchall()
 
@@ -52,7 +48,7 @@ def stats_home():
         text("SELECT * FROM experienced_employees")
     ).fetchall()
 
-    # 📌 Salary grades (CASE logic)
+    # 📌 Salary grades
     stats["salary_grades"] = db.session.execute(text("""
         SELECT emp_id, department, current_salary,
         CASE 
@@ -70,7 +66,7 @@ def stats_home():
         FROM professional_info
     """)).fetchall()
 
-    # 📈 Running totals and averages
+    # 📈 Running totals & averages
     stats["running_salary"] = db.session.execute(text("""
         SELECT emp_id, current_salary,
         SUM(current_salary) OVER (ORDER BY emp_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_sum,
@@ -93,4 +89,46 @@ def stats_home():
         WHERE d.dept_avg_salary > o.overall_salary
     """)).fetchall()
 
+    return stats
+
+
+# ------------------------------
+# Main page
+# ------------------------------
+@analytics_bp.route("/")
+def stats_home():
+    stats = _collect_stats()
     return render_template("stats.html", stats=stats)
+
+
+# ------------------------------
+# PDF download route
+# ------------------------------
+@analytics_bp.route("/download", methods=["POST"])
+def download_report():
+    company_name = request.form.get("company_name", "Unknown Company")
+    company_details = request.form.get("company_details", "")
+    stats = _collect_stats()
+
+    current_year = datetime.now().year
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Render HTML for PDF
+    html = render_template(
+        "stats_report.html",
+        stats=stats,
+        company_name=company_name,
+        company_details=company_details,
+        year=current_year,
+        generated_at=current_time
+    )
+
+    # PDFKit config — wkhtmltopdf must be installed inside container
+    config = pdfkit.configuration(wkhtmltopdf="/usr/local/bin/wkhtmltopdf")
+    pdf = pdfkit.from_string(html, False, configuration=config)
+
+    response = make_response(pdf)
+    response.headers["Content-Type"] = "application/pdf"
+    filename = f"HRMS_Report_{current_year}.pdf"
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    return response
