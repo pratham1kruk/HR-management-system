@@ -42,13 +42,21 @@ def stats_home():
         FROM professional_info
     """)).fetchall()
 
-    # LEAD & LAG salaries
+    # LEAD & LAG salaries (ordered by hire date for career progression context)
     stats["salary_lead_lag"] = db.session.execute(text("""
-        SELECT emp_id, current_salary, last_increment,
-        LAG(current_salary) OVER (ORDER BY emp_id) AS previous_salary,
-        LEAD(current_salary) OVER (ORDER BY emp_id) AS next_salary
-        FROM professional_info
+    SELECT e.emp_id,
+           e.first_name || ' ' || e.last_name AS full_name,
+           e.hire_date,
+           p.current_salary,
+           p.last_increment,
+           LAG(p.current_salary) OVER (ORDER BY e.hire_date) AS previous_salary,
+           LEAD(p.current_salary) OVER (ORDER BY e.hire_date) AS next_salary
+    FROM employee e
+    JOIN professional_info p 
+         ON e.emp_id = p.emp_id
+    ORDER BY e.hire_date
     """)).fetchall()
+
 
     # Avg salary comparison with department
     stats["departments_above_avg"] = db.session.execute(text("""

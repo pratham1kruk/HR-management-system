@@ -7,51 +7,83 @@
     <style>
         body {
             padding: 40px;
-            background-color: #f1f4f9;
+            background: linear-gradient(135deg, #f8f9fa, #eef2f7);
             font-family: 'Segoe UI', sans-serif;
         }
         h1 {
             text-align: center;
             margin-bottom: 50px;
             font-size: 2.5rem;
-            font-weight: 600;
+            font-weight: 700;
+            color: #0d6efd;
         }
         h2 {
-            margin-top: 60px;
-            font-size: 1.7rem;
-            color: #212529;
-            border-left: 5px solid #0d6efd;
-            padding-left: 15px;
+            font-size: 1.5rem;
+            color: #343a40;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        table {
-            background: #ffffff;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-        }
-        th {
-            background-color: #0d6efd;
-            color: #fff;
-            text-transform: capitalize;
-        }
-        td, th {
-            padding: 14px;
-            vertical-align: middle;
-            font-size: 0.95rem;
-        }
-        .table-hover tbody tr:hover {
-            background-color: #f1f1f1;
-        }
-        .container {
-            max-width: 1200px;
-            margin: auto;
+        h2::before {
+            content: "📂";
+            font-size: 1.3rem;
         }
         .section-card {
             padding: 25px;
+            background: #ffffff;
+            border-radius: 14px;
+            margin-bottom: 35px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .section-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+        }
+        table {
             background: white;
-            border-radius: 12px;
-            margin-bottom: 40px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.03);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th {
+            background: #0d6efd;
+            color: white;
+            text-transform: capitalize;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+        td {
+            vertical-align: middle;
+            font-size: 0.92rem;
+            text-align: center;
+        }
+        .highlight-high {
+            background-color: #d4edda !important; /* light green */
+            font-weight: bold;
+            color: #155724;
+        }
+        .highlight-low {
+            background-color: #f8d7da !important; /* light red */
+            font-weight: bold;
+            color: #721c24;
+        }
+        .badge-custom {
+            padding: 0.5em 0.7em;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .badge-high {
+            background-color: #198754;
+            color: white;
+        }
+        .badge-medium {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .badge-low {
+            background-color: #dc3545;
+            color: white;
         }
     </style>
 </head>
@@ -61,10 +93,10 @@
 
     {% for section, rows in stats.items() %}
         <div class="section-card">
-            <h2>📂 {{ section.replace("_", " ").title() }}</h2>
+            <h2>{{ section.replace("_", " ").title() }}</h2>
             {% if rows %}
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
+                    <table class="table table-bordered table-hover align-middle">
                         <thead>
                             <tr>
                                 {% for col in rows[0]._mapping.keys() %}
@@ -75,8 +107,25 @@
                         <tbody>
                             {% for row in rows %}
                                 <tr>
-                                    {% for value in row %}
-                                        <td>{{ value }}</td>
+                                    {% for col, value in row._mapping.items() %}
+                                        <td
+                                            {% if col == 'current_salary' and value is number and value > 70000 %}
+                                                class="highlight-high"
+                                            {% elif col == 'current_salary' and value is number and value < 40000 %}
+                                                class="highlight-low"
+                                            {% endif %}
+                                        >
+                                            {% if col == 'grade' %}
+                                                <span class="badge-custom 
+                                                    {% if value == 'High' %}badge-high
+                                                    {% elif value == 'Medium' %}badge-medium
+                                                    {% else %}badge-low{% endif %}">
+                                                    {{ value }}
+                                                </span>
+                                            {% else %}
+                                                {{ value }}
+                                            {% endif %}
+                                        </td>
                                     {% endfor %}
                                 </tr>
                             {% endfor %}
@@ -84,7 +133,7 @@
                     </table>
                 </div>
             {% else %}
-                <p class="text-muted">No data available for this section.</p>
+                <p class="text-muted fst-italic">No data available for this section.</p>
             {% endif %}
         </div>
     {% endfor %}
