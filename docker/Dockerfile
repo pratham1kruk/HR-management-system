@@ -11,6 +11,12 @@ WORKDIR /app
 # Copy requirements and install
 COPY backend/requirements.txt .
 
+# in your Dockerfile (example)
+RUN apt-get update && apt-get install -y \
+    wkhtmltopdf \
+    --no-install-recommends && rm -rf /var/lib/apt/lists/*
+
+
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
