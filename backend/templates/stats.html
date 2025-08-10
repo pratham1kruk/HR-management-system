@@ -12,38 +12,33 @@
         }
         h1 {
             text-align: center;
-            margin-bottom: 50px;
-            font-size: 2.5rem;
+            margin-bottom: 40px;
+            font-size: 2.4rem;
             font-weight: 700;
             color: #0d6efd;
         }
-        h2 {
-            font-size: 1.5rem;
-            color: #343a40;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .nav-tabs .nav-link {
+            font-weight: 500;
+            color: #495057;
         }
-        h2::before {
-            content: "📂";
-            font-size: 1.3rem;
+        .nav-tabs .nav-link.active {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd #0d6efd #fff;
+        }
+        .tab-pane {
+            margin-top: 25px;
         }
         .section-card {
-            padding: 25px;
+            padding: 20px;
             background: #ffffff;
-            border-radius: 14px;
-            margin-bottom: 35px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .section-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+            border-radius: 12px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.06);
         }
         table {
-            background: white;
             border-radius: 10px;
             overflow: hidden;
+            background: white;
         }
         th {
             background: #0d6efd;
@@ -53,90 +48,108 @@
             font-size: 0.95rem;
         }
         td {
-            vertical-align: middle;
-            font-size: 0.92rem;
             text-align: center;
+            font-size: 0.92rem;
+            vertical-align: middle;
         }
         .highlight-high {
-            background-color: #d4edda !important; /* light green */
+            background-color: #d4edda !important;
             font-weight: bold;
             color: #155724;
         }
         .highlight-low {
-            background-color: #f8d7da !important; /* light red */
+            background-color: #f8d7da !important;
             font-weight: bold;
             color: #721c24;
         }
         .badge-custom {
-            padding: 0.5em 0.7em;
+            padding: 0.4em 0.65em;
             border-radius: 8px;
             font-size: 0.85rem;
             font-weight: 500;
         }
-        .badge-high {
-            background-color: #198754;
-            color: white;
-        }
-        .badge-medium {
-            background-color: #ffc107;
-            color: #212529;
-        }
-        .badge-low {
-            background-color: #dc3545;
-            color: white;
-        }
+        .badge-high { background-color: #198754; color: white; }
+        .badge-medium { background-color: #ffc107; color: #212529; }
+        .badge-low { background-color: #dc3545; color: white; }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>📈 HR Analytics Dashboard</h1>
 
-    {% for section, rows in stats.items() %}
-        <div class="section-card">
-            <h2>{{ section.replace("_", " ").title() }}</h2>
-            {% if rows %}
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover align-middle">
-                        <thead>
-                            <tr>
-                                {% for col in rows[0]._mapping.keys() %}
-                                    <th>{{ col.replace('_', ' ').title() }}</th>
-                                {% endfor %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in rows %}
-                                <tr>
-                                    {% for col, value in row._mapping.items() %}
-                                        <td
-                                            {% if col == 'current_salary' and value is number and value > 70000 %}
-                                                class="highlight-high"
-                                            {% elif col == 'current_salary' and value is number and value < 40000 %}
-                                                class="highlight-low"
-                                            {% endif %}
-                                        >
-                                            {% if col == 'grade' %}
-                                                <span class="badge-custom 
-                                                    {% if value == 'High' %}badge-high
-                                                    {% elif value == 'Medium' %}badge-medium
-                                                    {% else %}badge-low{% endif %}">
-                                                    {{ value }}
-                                                </span>
-                                            {% else %}
-                                                {{ value }}
-                                            {% endif %}
-                                        </td>
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs" id="analyticsTabs" role="tablist">
+        {% for section, rows in stats.items() %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if loop.first %}active{% endif %}"
+                        id="{{ section }}-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#{{ section }}-content"
+                        type="button" role="tab"
+                        aria-controls="{{ section }}-content"
+                        aria-selected="{{ 'true' if loop.first else 'false' }}">
+                    {% if section == 'salary_comparison' %}
+                        💵 Salary Comparison
+                    {% else %}
+                        {{ section.replace('_', ' ').title() }}
+                    {% endif %}
+                </button>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Tab Contents -->
+    <div class="tab-content" id="analyticsTabsContent">
+        {% for section, rows in stats.items() %}
+            <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="{{ section }}-content" role="tabpanel">
+                <div class="section-card">
+                    {% if rows %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        {% for col in rows[0]._mapping.keys() %}
+                                            <th>{{ col.replace('_', ' ').title() }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in rows %}
+                                        <tr>
+                                            {% for col, value in row._mapping.items() %}
+                                                <td
+                                                    {% if col == 'current_salary' and value is number and value > 70000 %}
+                                                        class="highlight-high"
+                                                    {% elif col == 'current_salary' and value is number and value < 40000 %}
+                                                        class="highlight-low"
+                                                    {% endif %}
+                                                >
+                                                    {% if col == 'grade' %}
+                                                        <span class="badge-custom 
+                                                            {% if value == 'High' %}badge-high
+                                                            {% elif value == 'Medium' %}badge-medium
+                                                            {% else %}badge-low{% endif %}">
+                                                            {{ value }}
+                                                        </span>
+                                                    {% else %}
+                                                        {{ value }}
+                                                    {% endif %}
+                                                </td>
+                                            {% endfor %}
+                                        </tr>
                                     {% endfor %}
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted fst-italic">No data available for this section.</p>
+                    {% endif %}
                 </div>
-            {% else %}
-                <p class="text-muted fst-italic">No data available for this section.</p>
-            {% endif %}
-        </div>
-    {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
