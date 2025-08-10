@@ -108,8 +108,7 @@ SELECT emp_id, department, current_salary,
     END AS salary_grade
 FROM professional_info;
 
--- ⏪ LEAD & LAG salary
--- Salary progression using hire date order
+-- 📊 Salary Lead & Lag Analysis by Hire Date
 SELECT e.emp_id,
        e.first_name || ' ' || e.last_name AS full_name,
        e.hire_date,
@@ -121,6 +120,7 @@ FROM employee e
 JOIN professional_info p 
      ON e.emp_id = p.emp_id
 ORDER BY e.hire_date;
+
 
 -- 🏆 RANK employees by salary
 SELECT emp_id, current_salary,
