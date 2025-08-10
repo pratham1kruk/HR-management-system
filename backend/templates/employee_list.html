@@ -2,104 +2,135 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>All Employees</title>
+    <title>Employees - Tab View</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        th, td {
-            font-size: 0.95rem;
-            vertical-align: middle;
+        #searchInput {
+            max-width: 300px;
         }
     </style>
 </head>
 <body class="bg-light">
 
 <div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-primary">📋 All Employee Records</h2>
-        <div>
-            <button class="btn btn-sm btn-outline-secondary me-2" onclick="toggleEmpId()">Toggle EmpID</button>
-            <a href="{{ url_for('employee.employee_home') }}" class="btn btn-secondary">Back to Dashboard</a>
-        </div>
+    <h2 class="text-primary mb-4">📋 Employee Records (Tabbed View)</h2>
+
+    <!-- Search Bar -->
+    <div class="mb-3">
+        <input type="text" id="searchInput" class="form-control" placeholder="🔍 Search by any field..." onkeyup="filterTable()">
     </div>
 
-    <table class="table table-bordered table-striped table-hover">
-        <thead class="table-dark text-center">
-            <tr>
-                <th>#</th>
-                <th class="emp-id-column d-none">EmpID</th>
-                <th>Full Name</th>
-                <th>DOB</th>
-                <th>Gender</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Hire Date</th>
-                <th>Designation</th>
-                <th>Department</th>
-                <th>Current Salary</th>
-                <th>Previous Salary</th>
-                <th>Last Increment</th>
-                <th>Skills</th>
-                <th>Rating</th>
-                <th colspan="3">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for emp in employees %}
-            <tr>
-                <td class="text-center" data-bs-toggle="tooltip" title="EmpID: {{ emp.emp_id }}">{{ loop.index }}</td>
-                <td class="emp-id-column d-none text-center">{{ emp.emp_id }}</td>
-                <td>{{ emp.full_name }}</td>
-                <td>{{ emp.dob or '—' }}</td>
-                <td>{{ emp.gender or '—' }}</td>
-                <td>{{ emp.email or '—' }}</td>
-                <td>{{ emp.phone or '—' }}</td>
-                <td>{{ emp.hire_date or '—' }}</td>
-                <td>{{ emp.professional.designation if emp.professional else '—' }}</td>
-                <td>{{ emp.professional.department if emp.professional else '—' }}</td>
-                <td>{{ emp.professional.current_salary if emp.professional else '—' }}</td>
-                <td>{{ emp.professional.previous_salary if emp.professional else '—' }}</td>
-                <td>{{ emp.professional.last_increment if emp.professional else '—' }}</td>
-                <td>{{ emp.professional.skills|join(', ') if emp.professional and emp.professional.skills else '—' }}</td>
-                <td>{{ emp.professional.performance_rating if emp.professional else '—' }}</td>
-                <td>
-                    <a href="{{ url_for('employee.edit_employee', emp_id=emp.emp_id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-                </td>
-                <td>
-                    {% if emp.professional %}
-                        <a href="{{ url_for('employee.edit_professional', emp_id=emp.emp_id) }}" class="btn btn-sm btn-outline-success">Edit Prof.</a>
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" id="employeeTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button">General Info</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="professional-tab" data-bs-toggle="tab" data-bs-target="#professional" type="button">Professional Info</button>
+        </li>
+    </ul>
+
+    <!-- Tab Contents -->
+    <div class="tab-content mt-3">
+        <!-- General Info Table -->
+        <div class="tab-pane fade show active" id="general">
+            <table class="table table-bordered table-striped table-hover searchable-table">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>#</th>
+                        <th>Emp ID</th>
+                        <th>Full Name</th>
+                        <th>DOB</th>
+                        <th>Gender</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Hire Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emp in employees %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ emp.emp_id }}</td>
+                        <td>{{ emp.full_name }}</td>
+                        <td>{{ emp.dob or '—' }}</td>
+                        <td>{{ emp.gender or '—' }}</td>
+                        <td>{{ emp.email or '—' }}</td>
+                        <td>{{ emp.phone or '—' }}</td>
+                        <td>{{ emp.hire_date or '—' }}</td>
+                        <td>
+                            <a href="{{ url_for('employee.edit_employee', emp_id=emp.emp_id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <form method="POST" action="{{ url_for('employee.delete_employee', emp_id=emp.emp_id) }}" style="display:inline;" onsubmit="return confirm('Delete this employee?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">🗑️</button>
+                            </form>
+                        </td>
+                    </tr>
                     {% else %}
-                        <a href="{{ url_for('employee.add_professional_info') }}?emp_id={{ emp.emp_id }}" class="btn btn-sm btn-outline-primary">Add Prof.</a>
-                    {% endif %}
-                </td>
-                <td>
-                    <form method="POST" action="{{ url_for('employee.delete_employee', emp_id=emp.emp_id) }}" onsubmit="return confirm('Are you sure you want to delete this employee?');">
-                        <button type="submit" class="btn btn-sm btn-outline-danger">🗑️</button>
-                    </form>
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="17" class="text-center text-muted">No employee records found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                    <tr><td colspan="9" class="text-center text-muted">No employees found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Professional Info Table -->
+        <div class="tab-pane fade" id="professional">
+            <table class="table table-bordered table-striped table-hover searchable-table">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>#</th>
+                        <th>Emp ID</th>
+                        <th>Designation</th>
+                        <th>Department</th>
+                        <th>Current Salary</th>
+                        <th>Previous Salary</th>
+                        <th>Last Increment</th>
+                        <th>Skills</th>
+                        <th>Rating</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emp in employees %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ emp.emp_id }}</td>
+                        <td>{{ emp.professional.designation if emp.professional else '—' }}</td>
+                        <td>{{ emp.professional.department if emp.professional else '—' }}</td>
+                        <td>{{ emp.professional.current_salary if emp.professional else '—' }}</td>
+                        <td>{{ emp.professional.previous_salary if emp.professional else '—' }}</td>
+                        <td>{{ emp.professional.last_increment if emp.professional else '—' }}</td>
+                        <td>{{ emp.professional.skills|join(', ') if emp.professional and emp.professional.skills else '—' }}</td>
+                        <td>{{ emp.professional.performance_rating if emp.professional else '—' }}</td>
+                        <td>
+                            {% if emp.professional %}
+                                <a href="{{ url_for('employee.edit_professional', emp_id=emp.emp_id) }}" class="btn btn-sm btn-outline-success">Edit</a>
+                            {% else %}
+                                <a href="{{ url_for('employee.add_professional_info') }}?emp_id={{ emp.emp_id }}" class="btn btn-sm btn-outline-primary">Add</a>
+                            {% endif %}
+                            <form method="POST" action="{{ url_for('employee.delete_employee', emp_id=emp.emp_id) }}" style="display:inline;" onsubmit="return confirm('Delete this employee?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">🗑️</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="10" class="text-center text-muted">No professional info found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
-<!-- Bootstrap JS for tooltip -->
+<!-- Bootstrap + Search Script -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Enable Bootstrap tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(t => new bootstrap.Tooltip(t));
-
-    // Toggle EmpID column
-    function toggleEmpId() {
-        document.querySelectorAll('.emp-id-column').forEach(col => {
-            col.classList.toggle('d-none');
-        });
-    }
+function filterTable() {
+    const query = document.getElementById("searchInput").value.toLowerCase();
+    document.querySelectorAll(".searchable-table tbody tr").forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(query) ? "" : "none";
+    });
+}
 </script>
-
 </body>
 </html>

@@ -10,13 +10,49 @@ analytics_bp = Blueprint("analytics", __name__, url_prefix="/analytics")
 def stats_home():
     stats = {}
 
-    # Views
-    stats["top_earners"] = db.session.execute(text("SELECT * FROM top_earners_per_department")).fetchall()
-    stats["low_performers"] = db.session.execute(text("SELECT * FROM low_performers")).fetchall()
-    stats["promotion_candidates"] = db.session.execute(text("SELECT * FROM promotion_candidates")).fetchall()
-    stats["experienced_employees"] = db.session.execute(text("SELECT * FROM experienced_employees")).fetchall()
+    # 📊 Salary Comparison (Lead/Lag + Difference Analysis)
+    stats["salary_comparison"] = db.session.execute(text("""
+        SELECT 
+            e.emp_id,
+            e.first_name || ' ' || e.last_name AS full_name,
+            e.hire_date,
+            -- Salary difference for same employee
+            (p.current_salary - COALESCE(p.previous_salary, 0)) AS salary_diff,
+            -- Previous employee salary (by hire date)
+            LAG(p.current_salary, 1) OVER (ORDER BY e.hire_date) AS prev_emp_salary,
+            -- Current employee salary
+            p.current_salary,
+            -- Next employee salary (by hire date)
+            LEAD(p.current_salary, 1) OVER (ORDER BY e.hire_date) AS next_emp_salary,
+            -- Last increment
+            p.last_increment
+        FROM employee e
+        JOIN professional_info p 
+            ON e.emp_id = p.emp_id
+        ORDER BY e.hire_date
+    """)).fetchall()
 
-    # CASE-based salary grades
+    # 🏆 Top earners
+    stats["top_earners"] = db.session.execute(
+        text("SELECT * FROM top_earners_per_department")
+    ).fetchall()
+
+    # ⚠️ Low performers
+    stats["low_performers"] = db.session.execute(
+        text("SELECT * FROM low_performers")
+    ).fetchall()
+
+    # 🚀 Promotion candidates
+    stats["promotion_candidates"] = db.session.execute(
+        text("SELECT * FROM promotion_candidates")
+    ).fetchall()
+
+    # 🎯 Experienced employees
+    stats["experienced_employees"] = db.session.execute(
+        text("SELECT * FROM experienced_employees")
+    ).fetchall()
+
+    # 📌 Salary grades (CASE logic)
     stats["salary_grades"] = db.session.execute(text("""
         SELECT emp_id, department, current_salary,
         CASE 
@@ -27,14 +63,14 @@ def stats_home():
         FROM professional_info
     """)).fetchall()
 
-    # RANK by salary
+    # 🥇 Salary rank
     stats["salary_ranks"] = db.session.execute(text("""
         SELECT emp_id, current_salary,
         RANK() OVER (ORDER BY current_salary DESC) AS salary_rank
         FROM professional_info
     """)).fetchall()
 
-    # Running salary stats
+    # 📈 Running totals and averages
     stats["running_salary"] = db.session.execute(text("""
         SELECT emp_id, current_salary,
         SUM(current_salary) OVER (ORDER BY emp_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_sum,
@@ -42,15 +78,7 @@ def stats_home():
         FROM professional_info
     """)).fetchall()
 
-    # LEAD & LAG salaries
-    stats["salary_lead_lag"] = db.session.execute(text("""
-        SELECT emp_id, current_salary, last_increment,
-        LAG(current_salary) OVER (ORDER BY emp_id) AS previous_salary,
-        LEAD(current_salary) OVER (ORDER BY emp_id) AS next_salary
-        FROM professional_info
-    """)).fetchall()
-
-    # Avg salary comparison with department
+    # 🏢 Departments with salary above average
     stats["departments_above_avg"] = db.session.execute(text("""
         WITH dept_avg AS (
             SELECT department, AVG(current_salary) AS dept_avg_salary
