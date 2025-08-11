@@ -3,8 +3,10 @@ from models.postgres_models import db
 from sqlalchemy import text
 from datetime import datetime
 import pdfkit
+import shutil  # ✅ for auto-detecting wkhtmltopdf path
 
 analytics_bp = Blueprint("analytics", __name__, url_prefix="/analytics")
+
 
 # ------------------------------
 # Helper function to collect all analytics data
@@ -123,10 +125,20 @@ def download_report():
         generated_at=current_time
     )
 
-    # PDFKit config — wkhtmltopdf must be installed inside container
-    config = pdfkit.configuration(wkhtmltopdf="/usr/local/bin/wkhtmltopdf")
-    pdf = pdfkit.from_string(html, False, configuration=config)
+    # ✅ Auto-detect wkhtmltopdf path
+    wkhtmltopdf_path = shutil.which("wkhtmltopdf")
+    if not wkhtmltopdf_path:
+        return "wkhtmltopdf not found in container", 500
 
+    config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
+
+    # Generate PDF
+    try:
+        pdf = pdfkit.from_string(html, False, configuration=config)
+    except Exception as e:
+        return f"Failed to generate PDF: {e}", 500
+
+    # Send as download
     response = make_response(pdf)
     response.headers["Content-Type"] = "application/pdf"
     filename = f"HRMS_Report_{current_year}.pdf"
