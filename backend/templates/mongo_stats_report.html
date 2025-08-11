@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Mongo Analytics Report</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    /* Basic PDF-safe styles (inline) */
+    body { font-family: "Helvetica", Arial, sans-serif; color: #222; margin: 18px; }
+    header { display:flex; justify-content:space-between; align-items:center; margin-bottom: 18px; }
+    .brand { display:flex; gap:14px; align-items:center; }
+    .brand .logo { width:52px; height:52px; background:linear-gradient(135deg,#0d6efd,#198754); border-radius:8px; display:inline-block; text-align:center; color:white; line-height:52px; font-weight:700; }
+    h1 { font-size:20px; margin:0; color:#0d6efd; }
+    .meta { text-align:right; font-size:12px; color:#444; }
+    .company { font-size:14px; color:#155724; margin-top:6px; }
+    hr { border: none; height: 1px; background: #eee; margin: 12px 0; }
+
+    section { margin-bottom:14px; padding:10px 6px; border-radius:6px; background:#fff; box-shadow:0 1px 0 rgba(0,0,0,0.02); }
+    h2.section-title { margin:0 0 8px 0; font-size:14px; color:#0d6efd; }
+
+    table { width:100%; border-collapse: collapse; font-size:12px; margin-top:6px; }
+    th, td { padding:8px 6px; border: 1px solid #e6e9ee; text-align:left; vertical-align:top; }
+    th { background: linear-gradient(90deg,#e6f0ff,#e9f7ef); color:#0b3b72; font-weight:700; }
+    .small { font-size:11px; color:#666; }
+
+    /* colored badges */
+    .badge { display:inline-block; padding:4px 8px; border-radius:6px; color:#fff; font-size:12px; }
+    .b-blue { background:#0d6efd; }
+    .b-green { background:#198754; }
+    .b-yellow { background:#ffc107; color:#111; }
+    .b-red { background:#dc3545; }
+
+    footer { position:fixed; bottom:10px; left:18px; right:18px; font-size:10px; color:#777; text-align:center; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">HR</div>
+      <div>
+        <h1>HRMS Office Report — {{ year or "" }}</h1>
+        <div class="company">{{ company_name }}</div>
+        {% if company_details %}<div class="small">{{ company_details }}</div>{% endif %}
+      </div>
+    </div>
+    <div class="meta">
+      <div>Generated: <strong>{{ generated_at }}</strong></div>
+      <div class="small">Source: MongoDB personnel collection</div>
+    </div>
+  </header>
+
+  <hr/>
+
+  <!-- Blood Group Summary -->
+  <section>
+    <h2 class="section-title">Company Blood Bank <span class="badge b-blue" style="float:right;">{{ blood_data|length }} groups</span></h2>
+    {% if blood_data %}
+    <table>
+      <thead>
+        <tr><th>Blood Group</th><th>Count</th></tr>
+      </thead>
+      <tbody>
+        {% for b in blood_data %}
+        <tr><td>{{ b._id or 'Unknown' }}</td><td>{{ b.count }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="small">No blood group data available.</p>
+    {% endif %}
+  </section>
+
+  <!-- Qualifications -->
+  <section>
+    <h2 class="section-title">Qualifications & Experience <span class="badge b-green" style="float:right;">{{ qualification_data|length }}</span></h2>
+    {% if qualification_data %}
+      <table>
+        <thead><tr><th>Employee ID</th><th>Name</th><th># Qualifications</th><th>Sample Qualifications / Experiences</th></tr></thead>
+        <tbody>
+          {% for emp in qualification_data %}
+          <tr>
+            <td>{{ emp._id }}</td>
+            <td>{{ emp.name or 'N/A' }}</td>
+            <td>{{ emp.count }}</td>
+            <td>
+              {% if emp.qualifications %}
+                <strong>Quals:</strong> {{ (emp.qualifications[:3] | join(', ')) }}{% if emp.qualifications|length > 3 %} ...{% endif %}<br/>
+              {% endif %}
+              {% if emp.experiences %}
+                <strong>Exp:</strong> {{ (emp.experiences[:3] | join(', ')) }}{% if emp.experiences|length > 3 %} ...{% endif %}
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="small">No qualification/experience information available.</p>
+    {% endif %}
+  </section>
+
+  <!-- City / State -->
+  <section>
+    <h2 class="section-title">Geographic Distribution <span class="badge b-yellow" style="float:right;">Cities: {{ city_data|length }}</span></h2>
+    <table>
+      <thead><tr><th>City / State</th><th>Count</th></tr></thead>
+      <tbody>
+        {% for c in city_data %}
+          <tr><td>{{ c._id or 'Unknown' }}</td><td>{{ c.count }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <hr style="margin:10px 0; border-color:#f0f2f5;" />
+
+    <table>
+      <thead><tr><th>State</th><th>Count</th></tr></thead>
+      <tbody>
+        {% for s in state_data %}
+          <tr><td>{{ s._id or 'Unknown' }}</td><td>{{ s.count }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Gender -->
+  <section>
+    <h2 class="section-title">Gender Distribution <span class="badge b-red" style="float:right;">Total: {{ gender_stats.total }}</span></h2>
+    <table>
+      <thead><tr><th>Gender</th><th>Count</th><th>Percentage</th></tr></thead>
+      <tbody>
+        <tr><td>Male</td><td>{{ gender_stats.male }}</td><td>{{ gender_stats.male_percent }}%</td></tr>
+        <tr><td>Female</td><td>{{ gender_stats.female }}</td><td>{{ gender_stats.female_percent }}%</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>HRMS • Generated at {{ generated_at }} • Page size A4</footer>
+</body>
+</html>
