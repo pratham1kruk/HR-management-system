@@ -1,235 +1,319 @@
+<!-- backend/templates/mongo_stats.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>MongoDB Personnel Analytics</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body { background: linear-gradient(135deg,#f4f8fb,#eef6f2); font-family: "Segoe UI", sans-serif; padding-bottom:40px; }
-    h2 { color:#0d6efd; font-weight:700; }
-    .section-card { background:white; border-radius:10px; padding:18px; box-shadow:0 6px 20px rgba(0,0,0,0.05); margin-bottom:18px; }
-    .btn-report { background: linear-gradient(90deg,#198754,#0d6efd); color:white; border:none; }
-    .small-muted { color:#6c757d; font-size:0.9rem; }
-
-    /* Home button style */
-    .header-home-btn {
-        position: fixed;
-        top: 12px;
-        right: 12px;
-        background-color: #0d6efd;
-        color: white;
-        padding: 8px 14px;
-        border-radius: 6px;
-        font-size: 14px;
-        font-family: Arial, sans-serif;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        text-decoration: none;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        transition: background 0.2s ease;
-        z-index: 999;
-    }
-    .header-home-btn:hover {
-        background-color: #0b5ed7;
-        text-decoration: none;
-    }
-    .header-home-btn svg {
-        width: 16px;
-        height: 16px;
-        fill: white;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <title>📊 MongoDB Personnel Analytics</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            padding: 28px;
+            font-family: 'Segoe UI', sans-serif;
+            background: url("{{ url_for('static', filename='assets/img/Dkyellow domain.png') }}") no-repeat center center fixed;
+            background-size: cover;
+            color: #212529;
+        }
+        h1 {
+            text-align: left;
+            margin-bottom: 18px;
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #2b7bad; /* Blue */
+            display: inline-block;
+        }
+        .controls {
+            float: right;
+            margin-top: -6px;
+        }
+        .download-btn {
+            background-color: #fbb03b; /* Yellow/Orange */
+            color: white;
+            border: none;
+        }
+        .download-btn:hover {
+            filter: brightness(0.95);
+        }
+        .section-card {
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.88); /* translucent white */
+            border-radius: 12px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+            margin-top: 18px;
+        }
+        table {
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            width: 100%;
+        }
+        th {
+            background: #70b55f; /* Green */
+            color: white;
+            text-transform: capitalize;
+            text-align: center;
+            font-size: 0.92rem;
+        }
+        td {
+            text-align: center;
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+        .btn-report {
+            background: #fbb03b; /* Yellow/Orange */
+            color: white;
+            border: none;
+        }
+        .btn-report:hover {
+            filter: brightness(0.9);
+        }
+        .small-muted {
+            color: #495057;
+            font-size: 0.9rem;
+        }
+        /* Blood group input group */
+        .input-group > .form-select {
+            max-width: 220px;
+        }
+        /* Toggle button for qualification details */
+        .btn-toggle {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        /* Highlight styling for gender stats table */
+        .gender-table thead th {
+            background-color: #2b7bad; /* Blue */
+            color: white;
+        }
+    </style>
 </head>
-<body class="container py-4">
+<body>
+<div class="container-fluid px-3">
 
-  <!-- Fixed Home Button -->
-  <a href="{{ url_for('home') }}" class="header-home-btn">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
-          <path d="M541 229.16l-61-53.51V56a8 8 0 0 0-8-8h-40a8 8 0 0 0-8 8v72.59l-84.69-74.19a35.36 35.36 0 0 0-46.61 0L35 229.16a12 12 0 0 0-1.6 17l25.5 28.43a12 12 0 0 0 17 1.6l21.1-18.47V456a24 24 0 0 0 24 24h112a24 24 0 0 0 24-24V344h64v112a24 24 0 0 0 24 24h112a24 24 0 0 0 24-24V257.75l21.1 18.47a12 12 0 0 0 17-1.6l25.5-28.43a12 12 0 0 0-1.6-17z"/>
-      </svg>
-      Home
-  </a>
+    <div class="d-flex align-items-center mb-3">
+        <h1>📊 MongoDB Personnel Analytics</h1>
 
-  <div class="d-flex justify-content-between align-items-center my-3">
-    <h2>📊 MongoDB Personnel Analytics</h2>
-    <div>
-      <button class="btn btn-danger me-2" data-bs-toggle="modal" data-bs-target="#reportModal">⬇️ Download Report</button>
+        <div class="controls ms-auto">
+            <button class="btn btn-outline-secondary me-2" onclick="window.print()" title="Print View">
+                🖨 Print View
+            </button>
+            <button class="btn download-btn" data-bs-toggle="modal" data-bs-target="#reportModal">
+                ⬇️ Download Report
+            </button>
+        </div>
     </div>
-  </div>
 
-  <!-- Download Report Modal -->
-  <div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+    <!-- Company Blood Bank Section -->
+    <div class="section-card">
+        <h4 style="color:#2b7bad; font-weight:700;">🩸 Company Blood Bank</h4>
+        <div class="input-group my-3">
+            <select id="bloodGroupSelect" class="form-select">
+                <option value="">Select Blood Group</option>
+                {% for b in blood_data %}
+                    {% if b._id %}
+                        <option value="{{ b._id }}">{{ b._id }} ({{ b.count }} employees)</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+            <button class="btn download-btn" onclick="fetchBloodGroupEmployees()">Search</button>
+        </div>
+        <div id="bloodResult" class="border rounded p-3 bg-light" style="display:none;">
+            <h5>Employees with Selected Blood Group</h5>
+            <ul id="bloodList" class="list-group"></ul>
+        </div>
+    </div>
+
+    <!-- Qualification & Experience Section -->
+    <div class="section-card">
+        <h4 style="color:#2b7bad; font-weight:700;">🎓 Qualifications & Past Experiences</h4>
+        {% if qualification_data %}
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0">
+                    <thead>
+                        <tr style="background:#70b55f; color:white;">
+                            <th>Employee ID</th>
+                            <th>Name</th>
+                            <th>Qualification Count</th>
+                            <th>View Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for emp in qualification_data %}
+                        <tr>
+                            <td>{{ emp._id }}</td>
+                            <td>{{ emp.name or 'N/A' }}</td>
+                            <td>{{ emp.count }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary btn-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#details-{{ loop.index }}">
+                                    Toggle
+                                </button>
+                                <div id="details-{{ loop.index }}" class="collapse mt-2 text-start">
+                                    <strong>Qualifications:</strong>
+                                    {% if emp.qualifications %}
+                                        <ul>
+                                            {% for q in emp.qualifications %}
+                                                <li>{{ q }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <p class="text-muted">No qualifications found.</p>
+                                    {% endif %}
+                                    <strong>Past Experiences:</strong>
+                                    {% if emp.experiences %}
+                                        <ul>
+                                            {% for e in emp.experiences %}
+                                                <li>{{ e }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <p class="text-muted">No past experiences found.</p>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted fst-italic">No qualification/experience data found.</p>
+        {% endif %}
+    </div>
+
+    <!-- City-wise Distribution -->
+    <div class="section-card">
+        <h4 style="color:#2b7bad; font-weight:700;">🏙 City-wise Distribution</h4>
+        {% if city_data %}
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0">
+                    <thead>
+                        <tr style="background:#70b55f; color:white;">
+                            <th>City</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for city in city_data %}
+                            <tr><td>{{ city._id or "Unknown" }}</td><td>{{ city.count }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted fst-italic">No city data available.</p>
+        {% endif %}
+    </div>
+
+    <!-- State-wise Distribution -->
+    <div class="section-card">
+        <h4 style="color:#2b7bad; font-weight:700;">🏞 State-wise Distribution</h4>
+        {% if state_data %}
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0">
+                    <thead>
+                        <tr style="background:#70b55f; color:white;">
+                            <th>State</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for state in state_data %}
+                            <tr><td>{{ state._id or "Unknown" }}</td><td>{{ state.count }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted fst-italic">No state data available.</p>
+        {% endif %}
+    </div>
+
+    <!-- Gender Distribution -->
+    <div class="section-card mb-5">
+        <h4 style="color:#2b7bad; font-weight:700;">🚻 Gender Distribution</h4>
+        <div class="table-responsive">
+            <table class="table table-bordered gender-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Gender</th>
+                        <th>Count</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Male</td><td>{{ gender_stats.male }}</td><td>{{ gender_stats.male_percent }}%</td></tr>
+                    <tr><td>Female</td><td>{{ gender_stats.female }}</td><td>{{ gender_stats.female_percent }}%</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <p class="small-muted text-center">Analytics generated from personnel collection</p>
+
+</div>
+
+<!-- Download Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <form method="POST" action="{{ url_for('mongo_analytics.mongo_download_report') }}" class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Download Analytics Report</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-2">
-            <label class="form-label">Company / Organization Name</label>
-            <input name="company_name" class="form-control" placeholder="e.g. Acme Corp" />
-          </div>
-          <div class="mb-2">
-            <label class="form-label">Company Details (address / contact)</label>
-            <textarea name="company_details" class="form-control" rows="3" placeholder="Optional details for the report..."></textarea>
-          </div>
-          <p class="small-muted">PDF will include all visible analytics sections and generated timestamp.</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-report">Generate & Download</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Company Blood Bank -->
-  <div class="section-card mb-4">
-    <h4>🩸 Company Blood Bank</h4>
-    <div class="input-group my-2">
-      <select id="bloodGroupSelect" class="form-select">
-        <option value="">Select Blood Group</option>
-        {% for b in blood_data %}
-          {% if b._id %}
-            <option value="{{ b._id }}">{{ b._id }} ({{ b.count }} employees)</option>
-          {% endif %}
-        {% endfor %}
-      </select>
-      <button class="btn btn-danger" onclick="fetchBloodGroupEmployees()">Search</button>
-    </div>
-    <div id="bloodResult" class="border rounded p-3 bg-light" style="display:none;">
-      <h5>Employees with Selected Blood Group</h5>
-      <ul id="bloodList" class="list-group"></ul>
-    </div>
-  </div>
-
-  <!-- Qualification & Experience Per Employee -->
-  <div class="section-card mb-4">
-    <h4>🎓 Qualifications & Past Experiences</h4>
-    {% if qualification_data %}
-      <div class="table-responsive">
-        <table class="table table-bordered mb-0">
-          <thead class="table-light">
-            <tr>
-              <th>Employee ID</th>
-              <th>Name</th>
-              <th>Qualification Count</th>
-              <th>View Details</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for emp in qualification_data %}
-            <tr>
-              <td>{{ emp._id }}</td>
-              <td>{{ emp.name or 'N/A' }}</td>
-              <td>{{ emp.count }}</td>
-              <td>
-                <button class="btn btn-sm btn-info" type="button" data-bs-toggle="collapse" data-bs-target="#details-{{ loop.index }}">Toggle</button>
-                <div id="details-{{ loop.index }}" class="collapse mt-2">
-                  <strong>Qualifications:</strong>
-                  {% if emp.qualifications %}
-                    <ul class="list-group mb-2">
-                      {% for q in emp.qualifications %}<li class="list-group-item">{{ q }}</li>{% endfor %}
-                    </ul>
-                  {% else %}<p class="text-muted">No qualifications found.</p>{% endif %}
-                  <strong>Past Experiences:</strong>
-                  {% if emp.experiences %}
-                    <ul class="list-group">
-                      {% for e in emp.experiences %}<li class="list-group-item">{{ e }}</li>{% endfor %}
-                    </ul>
-                  {% else %}<p class="text-muted">No past experiences found.</p>{% endif %}
+        <form method="POST" action="{{ url_for('mongo_analytics.mongo_download_report') }}" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Download Analytics Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Company / Organization Name</label>
+                    <input name="company_name" class="form-control" placeholder="e.g. Acme Corp" />
                 </div>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p class="text-muted">No qualification/experience data found.</p>
-    {% endif %}
-  </div>
-
-  <!-- City-wise Count -->
-  <div class="section-card mb-4">
-    <h4>🏙 City-wise Distribution</h4>
-    {% if city_data %}
-      <div class="table-responsive">
-        <table class="table table-bordered mb-0">
-          <thead class="table-light">
-            <tr><th>City</th><th>Count</th></tr>
-          </thead>
-          <tbody>
-            {% for city in city_data %}
-            <tr><td>{{ city._id or "Unknown" }}</td><td>{{ city.count }}</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}<p class="text-muted">No city data available.</p>{% endif %}
-  </div>
-
-  <!-- State-wise Count -->
-  <div class="section-card mb-4">
-    <h4>🏞 State-wise Distribution</h4>
-    {% if state_data %}
-      <div class="table-responsive">
-        <table class="table table-bordered mb-0">
-          <thead class="table-light"><tr><th>State</th><th>Count</th></tr></thead>
-          <tbody>
-            {% for state in state_data %}<tr><td>{{ state._id or "Unknown" }}</td><td>{{ state.count }}</td></tr>{% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}<p class="text-muted">No state data available.</p>{% endif %}
-  </div>
-
-  <!-- Gender Distribution -->
-  <div class="section-card mb-5">
-    <h4>🚻 Gender Distribution</h4>
-    <div class="table-responsive">
-      <table class="table table-bordered mb-0">
-        <thead class="table-light"><tr><th>Gender</th><th>Count</th><th>Percentage</th></tr></thead>
-        <tbody>
-          <tr><td>Male</td><td>{{ gender_stats.male }}</td><td>{{ gender_stats.male_percent }}%</td></tr>
-          <tr><td>Female</td><td>{{ gender_stats.female }}</td><td>{{ gender_stats.female_percent }}%</td></tr>
-        </tbody>
-      </table>
+                <div class="mb-3">
+                    <label class="form-label">Company Details (address / contact)</label>
+                    <textarea name="company_details" class="form-control" rows="3" placeholder="Optional details for the report..."></textarea>
+                </div>
+                <p class="small-muted">PDF will include all visible analytics sections and generated timestamp.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-report">Generate & Download</button>
+            </div>
+        </form>
     </div>
-  </div>
+</div>
 
-  <p class="small-muted text-center">Analytics generated from personnel collection</p>
+<!-- Bootstrap JS and Blood Group Fetch Script -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function fetchBloodGroupEmployees() {
+    const group = document.getElementById("bloodGroupSelect").value;
+    if (!group) {
+        alert("Please select a blood group");
+        return;
+    }
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    function fetchBloodGroupEmployees() {
-      const group = document.getElementById("bloodGroupSelect").value;
-      if (!group) { alert("Please select a blood group"); return; }
-
-      fetch(`/personnel/analytics/bloodgroup/${group}`)
+    fetch(`/personnel/analytics/bloodgroup/${group}`)
         .then(res => res.json())
         .then(data => {
-          const resultDiv = document.getElementById("bloodResult");
-          const list = document.getElementById("bloodList");
-          list.innerHTML = "";
+            const resultDiv = document.getElementById("bloodResult");
+            const list = document.getElementById("bloodList");
+            list.innerHTML = "";
 
-          if (data && data.length > 0) {
-            data.forEach(emp => {
-              const li = document.createElement("li");
-              li.classList.add("list-group-item");
-              li.innerHTML = `<strong>${emp.name}</strong> (ID: ${emp.employee_id})<br>📞 ${emp.phone || 'N/A'} | 📧 ${emp.email || 'N/A'}`;
-              list.appendChild(li);
-            });
-            resultDiv.style.display = "block";
-          } else {
-            list.innerHTML = `<li class="list-group-item text-muted">No employees found with this blood group.</li>`;
-            resultDiv.style.display = "block";
-          }
+            if (data && data.length > 0) {
+                data.forEach(emp => {
+                    const li = document.createElement("li");
+                    li.classList.add("list-group-item");
+                    li.innerHTML = `<strong>${emp.name}</strong> (ID: ${emp.employee_id})<br>📞 ${emp.phone || 'N/A'} | 📧 ${emp.email || 'N/A'}`;
+                    list.appendChild(li);
+                });
+                resultDiv.style.display = "block";
+            } else {
+                list.innerHTML = `<li class="list-group-item text-muted">No employees found with this blood group.</li>`;
+                resultDiv.style.display = "block";
+            }
         })
-        .catch(err => { console.error(err); alert("Error fetching blood group data."); });
-    }
-  </script>
+        .catch(err => {
+            console.error(err);
+            alert("Error fetching blood group data.");
+        });
+}
+</script>
 </body>
 </html>
