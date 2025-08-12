@@ -112,8 +112,10 @@ def download_report():
     company_details = request.form.get("company_details", "")
     stats = _collect_stats()
 
+    # 📅 Current date & time for template
     current_year = datetime.now().year
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    generated_on = datetime.now().strftime("%Y-%m-%d")
+    generated_at = datetime.now().strftime("%H:%M:%S")
 
     # Render HTML for PDF
     html = render_template(
@@ -121,8 +123,9 @@ def download_report():
         stats=stats,
         company_name=company_name,
         company_details=company_details,
-        year=current_year,
-        generated_at=current_time
+        report_year=current_year,
+        generated_on=generated_on,
+        generated_at=generated_at
     )
 
     # ✅ Auto-detect wkhtmltopdf path
