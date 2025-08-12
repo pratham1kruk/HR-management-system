@@ -55,3 +55,12 @@ ckp 13 starts
 ckp 13a
 
 ckp 13b - home button worked
+
+
+ckp 13 over
+
+session 3 over
+
+session 4 starts
+
+checkpoint 14 
