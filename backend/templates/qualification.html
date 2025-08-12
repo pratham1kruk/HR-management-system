@@ -1,4 +1,4 @@
-<!-- qualification.html (Improved) -->
+<!-- qualification.html (Blue Domain Themed) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,23 +10,88 @@
 
   <style>
     body {
-      background: linear-gradient(to right, #f8f9fa, #e9ecef);
       font-family: 'Segoe UI', sans-serif;
+      background: url("{{ url_for('static', filename='assets/img/blue domain.png') }}") no-repeat center center fixed;
+      background-size: cover;
+      padding: 40px 15px;
     }
     .form-section {
       max-width: 700px;
       margin: auto;
-      background: white;
+      background: rgba(255, 255, 255, 0.92);
       padding: 30px;
       border-radius: 15px;
-      box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 20px rgba(0, 80, 120, 0.2);
+    }
+    h2 {
+      font-weight: bold;
+      color: #005f99;
+      margin-bottom: 20px;
     }
     .custom-input {
       margin-top: 10px;
     }
+    .btn-info {
+      background-color: #0077b6;
+      border: none;
+    }
+    .btn-info:hover {
+      background-color: #005f8a;
+    }
+    .btn-outline-secondary {
+      border-color: #0077b6;
+      color: #0077b6;
+    }
+    .btn-outline-secondary:hover {
+      background-color: #0077b6;
+      color: white;
+    }
+    .btn-outline-danger {
+      border-color: #d62828;
+      color: #d62828;
+    }
+    .btn-outline-danger:hover {
+      background-color: #d62828;
+      color: white;
+    }
+    /* Fixed Home Button */
+    .header-home-btn {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      background-color: #0077b6;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      transition: background 0.2s ease;
+      z-index: 999;
+    }
+    .header-home-btn:hover {
+      background-color: #005f8a;
+      text-decoration: none;
+    }
+    .header-home-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: white;
+    }
   </style>
 </head>
-<body class="py-5">
+<body>
+
+<!-- Fixed Home Button -->
+<a href="{{ url_for('home') }}" class="header-home-btn">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+        <path d="M541 229.16l-61-53.51V56a8 8 0 0 0-8-8h-40a8 8 0 0 0-8 8v72.59l-84.69-74.19a35.36 35.36 0 0 0-46.61 0L35 229.16a12 12 0 0 0-1.6 17l25.5 28.43a12 12 0 0 0 17 1.6l21.1-18.47V456a24 24 0 0 0 24 24h112a24 24 0 0 0 24-24V344h64v112a24 24 0 0 0 24 24h112a24 24 0 0 0 24-24V257.75l21.1 18.47a12 12 0 0 0 17-1.6l25.5-28.43a12 12 0 0 0-1.6-17z"/>
+    </svg>
+    Home
+</a>
 
 <div class="container">
   <div class="form-section">
@@ -142,7 +207,7 @@ function removeQualificationField(button) {
   }
 }
 
-// Ensure only at least one qualification is required
+// Validation: Ensure at least one qualification
 document.getElementById('qualificationForm').addEventListener('submit', function(e) {
   const selects = document.querySelectorAll('.qualification-select');
   const inputs = document.querySelectorAll('.custom-input:not(.d-none)');

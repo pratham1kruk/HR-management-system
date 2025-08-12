@@ -6,100 +6,118 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
+            background: url("{{ url_for('static', filename='assets/img/blue domain.png') }}") no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
             padding: 40px;
-            background-color: #f5f5f5;
+        }
+        .form-container {
+            background: rgba(255, 255, 255, 0.88);
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 8px 18px rgba(0, 80, 120, 0.2);
+            max-width: 700px;
+            width: 100%;
         }
         h2 {
             font-size: 28px;
-            color: #333;
-        }
-        form {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            max-width: 700px;
-            box-shadow: 0px 0px 12px rgba(0,0,0,0.1);
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 25px;
+            color: #005f99; /* Deep ocean blue */
         }
         label {
             margin-top: 15px;
-            font-weight: bold;
+            font-weight: 500;
         }
         input[type="text"],
         input[type="number"] {
             width: 100%;
             padding: 10px;
             margin-top: 6px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            border: 1px solid #bcd0e0;
+            border-radius: 6px;
+            font-size: 15px;
         }
         .submit-btn {
             margin-top: 25px;
-            background-color: #007bff;
+            background-color: #0077b6; /* Bright blue */
             color: white;
             padding: 10px 20px;
             border: none;
             font-size: 16px;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
+            transition: background-color 0.2s ease;
         }
         .submit-btn:hover {
-            background-color: #0056b3;
+            background-color: #005f8a;
         }
         .back-link {
             display: inline-block;
             margin-top: 20px;
             text-decoration: none;
-            color: #007bff;
+            background-color: #00a896; /* Teal-green */
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
         }
         .back-link:hover {
-            text-decoration: underline;
+            background-color: #007f6d;
         }
     </style>
 </head>
 <body>
-    <h2>{{ '📝 Edit' if professional else '🧑‍💼 Add' }} Professional Information</h2>
-    <form method="POST">
-        <!-- Employee ID -->
-        <label for="emp_id">Employee ID</label>
-        {% if professional %}
-            <input type="number" name="emp_id" id="emp_id" value="{{ emp_id }}" readonly>
-        {% else %}
-            <input type="number" name="emp_id" id="emp_id" value="{{ emp_id or '' }}" required>
-        {% endif %}
+    <div class="form-container">
+        <h2>{{ '📝 Edit' if professional else '🧑‍💼 Add' }} Professional Information</h2>
+        <form method="POST">
+            <!-- Employee ID -->
+            <label for="emp_id">Employee ID</label>
+            {% if professional %}
+                <input type="number" name="emp_id" id="emp_id" value="{{ emp_id }}" readonly>
+            {% else %}
+                <input type="number" name="emp_id" id="emp_id" value="{{ emp_id or '' }}" required>
+            {% endif %}
 
-        <!-- Designation -->
-        <label for="designation">Designation</label>
-        <input type="text" name="designation" id="designation" value="{{ professional.designation if professional else '' }}" required>
+            <!-- Designation -->
+            <label for="designation">Designation</label>
+            <input type="text" name="designation" id="designation" value="{{ professional.designation if professional else '' }}" required>
 
-        <!-- Department -->
-        <label for="department">Department</label>
-        <input type="text" name="department" id="department" value="{{ professional.department if professional else '' }}" required>
+            <!-- Department -->
+            <label for="department">Department</label>
+            <input type="text" name="department" id="department" value="{{ professional.department if professional else '' }}" required>
 
-        <!-- Current Salary -->
-        <label for="current_salary">Current Salary</label>
-        <input type="number" step="0.01" name="current_salary" id="current_salary" value="{{ professional.current_salary if professional else '' }}" required>
+            <!-- Current Salary -->
+            <label for="current_salary">Current Salary</label>
+            <input type="number" step="0.01" name="current_salary" id="current_salary" value="{{ professional.current_salary if professional else '' }}" required>
 
-        <!-- Previous Salary -->
-        <label for="previous_salary">Previous Salary</label>
-        <input type="number" step="0.01" name="previous_salary" id="previous_salary" value="{{ professional.previous_salary if professional else '' }}" required>
+            <!-- Previous Salary -->
+            <label for="previous_salary">Previous Salary</label>
+            <input type="number" step="0.01" name="previous_salary" id="previous_salary" value="{{ professional.previous_salary if professional else '' }}" required>
 
-        <!-- Last Increment -->
-        <label for="last_increment">Last Increment</label>
-        <input type="number" step="0.01" name="last_increment" id="last_increment" value="{{ professional.last_increment if professional else '' }}" required>
+            <!-- Last Increment -->
+            <label for="last_increment">Last Increment</label>
+            <input type="number" step="0.01" name="last_increment" id="last_increment" value="{{ professional.last_increment if professional else '' }}" required>
 
-        <!-- Skills -->
-        <label for="skills">Skills (comma-separated)</label>
-        <input type="text" name="skills" id="skills" value="{{ professional.skills|join(', ') if professional and professional.skills else '' }}">
+            <!-- Skills -->
+            <label for="skills">Skills (comma-separated)</label>
+            <input type="text" name="skills" id="skills" value="{{ professional.skills|join(', ') if professional and professional.skills else '' }}">
 
-        <!-- Performance Rating -->
-        <label for="performance_rating">Performance Rating (0-5)</label>
-        <input type="number" step="0.1" min="0" max="5" name="performance_rating" id="performance_rating" value="{{ professional.performance_rating if professional else '' }}" required>
+            <!-- Performance Rating -->
+            <label for="performance_rating">Performance Rating (0-5)</label>
+            <input type="number" step="0.1" min="0" max="5" name="performance_rating" id="performance_rating" value="{{ professional.performance_rating if professional else '' }}" required>
 
-        <!-- Submit -->
-        <button type="submit" class="submit-btn">{{ 'Update' if professional else 'Save' }} Professional Info</button>
-    </form>
+            <!-- Submit -->
+            <button type="submit" class="submit-btn">{{ 'Update' if professional else 'Save' }} Professional Info</button>
+        </form>
 
-    <a href="{{ url_for('employee.list_employees') }}" class="back-link">← Back to Employee List</a>
+        <a href="{{ url_for('employee.list_employees') }}" class="back-link">← Back to Employee List</a>
+    </div>
 </body>
 </html>
