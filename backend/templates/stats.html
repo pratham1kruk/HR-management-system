@@ -9,15 +9,16 @@
     <style>
         body {
             padding: 28px;
-            background: linear-gradient(135deg, #f8fbf7, #eef6ff);
             font-family: 'Segoe UI', sans-serif;
+            background: url("{{ url_for('static', filename='assets/img/Dkyellow domain.png') }}") no-repeat center center fixed;
+            background-size: cover;
         }
         h1 {
             text-align: left;
             margin-bottom: 18px;
             font-size: 1.9rem;
             font-weight: 700;
-            color: #0d6efd;
+            color: #2b7bad; /* Blue from theme */
             display: inline-block;
         }
         .controls {
@@ -25,22 +26,46 @@
             margin-top: -6px;
         }
         .download-btn {
-            background-color: #d9534f;
+            background-color: #fbb03b; /* Yellow/Orange from theme */
             color: white;
             border: none;
         }
         .download-btn:hover { filter: brightness(0.95); }
         .nav-tabs .nav-link { font-weight: 500; color: #495057; }
-        .nav-tabs .nav-link.active { background-color: #0d6efd; color: white; border-color: #0d6efd #0d6efd #fff; }
-        .section-card { padding: 18px; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 18px rgba(0,0,0,0.06); margin-top: 18px; }
+        .nav-tabs .nav-link.active {
+            background-color: #2b7bad; /* Blue */
+            color: white;
+            border-color: #2b7bad #2b7bad #fff;
+        }
+        .section-card {
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.88); /* translucent white for readability */
+            border-radius: 12px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+            margin-top: 18px;
+        }
         table { border-radius: 8px; overflow: hidden; background: white; }
-        th { background: #0d6efd; color: white; text-transform: capitalize; text-align: center; font-size: 0.92rem; }
+        th {
+            background: #70b55f; /* Green from theme */
+            color: white;
+            text-transform: capitalize;
+            text-align: center;
+            font-size: 0.92rem;
+        }
         td { text-align: center; font-size: 0.9rem; vertical-align: middle; }
-        .highlight-high { background-color: #d4edda !important; color: #155724; font-weight: 600; }
-        .highlight-low { background-color: #f8d7da !important; color: #721c24; font-weight: 600; }
+        .highlight-high {
+            background-color: #d4edda !important;
+            color: #155724;
+            font-weight: 600;
+        }
+        .highlight-low {
+            background-color: #f8d7da !important;
+            color: #721c24;
+            font-weight: 600;
+        }
         .badge-custom { padding: 0.4em 0.65em; border-radius: 8px; font-size: 0.85rem; font-weight: 500; }
-        .badge-high { background-color: #198754; color: white; }
-        .badge-medium { background-color: #ffc107; color: #212529; }
+        .badge-high { background-color: #70b55f; color: white; } /* Green */
+        .badge-medium { background-color: #ffde85; color: #212529; } /* Light Yellow */
         .badge-low { background-color: #dc3545; color: white; }
     </style>
 </head>
@@ -87,7 +112,7 @@
         {% for section, rows in stats.items() %}
             <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="{{ section }}-content" role="tabpanel">
                 <div class="section-card">
-                    <h5 class="mb-3" style="color:#0d6efd; font-weight:700;">
+                    <h5 class="mb-3" style="color:#2b7bad; font-weight:700;">
                         {{ section.replace('_', ' ').title() }}
                     </h5>
 
