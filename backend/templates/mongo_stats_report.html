@@ -44,7 +44,8 @@
       </div>
     </div>
     <div class="meta">
-      <div>Generated: <strong>{{ generated_at }}</strong></div>
+      <div>Generated: <strong>{{ generated_on }}</strong></div>
+      <div class="small">Time: {{ generated_time }}</div>
       <div class="small">Source: MongoDB personnel collection</div>
     </div>
   </header>
@@ -135,6 +136,6 @@
     </table>
   </section>
 
-  <footer>HRMS • Generated at {{ generated_at }} • Page size A4</footer>
+  <footer>HRMS • Generated on {{ generated_on }} at {{ generated_time }} (IST) • Page size A4</footer>
 </body>
 </html>
