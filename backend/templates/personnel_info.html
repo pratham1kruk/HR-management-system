@@ -7,12 +7,19 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
+        body {
+            background: url("{{ url_for('static', filename='assets/img/green domain.png') }}") no-repeat center center fixed;
+            background-size: cover;
+            color: #0d3b2e;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
         /* Home button style */
         .header-home-btn {
             position: fixed;
             top: 12px;
             right: 12px;
-            background-color: #0d6efd; /* Bootstrap primary blue */
+            background-color: #004d40; /* Dark green */
             color: white;
             padding: 8px 14px;
             border-radius: 6px;
@@ -22,18 +29,69 @@
             align-items: center;
             gap: 6px;
             text-decoration: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 6px rgba(0, 50, 0, 0.2);
             transition: background 0.2s ease;
             z-index: 999;
         }
         .header-home-btn:hover {
-            background-color: #0b5ed7;
+            background-color: #00695c;
             text-decoration: none;
         }
         .header-home-btn svg {
             width: 16px;
             height: 16px;
             fill: white;
+        }
+
+        /* Section container */
+        .card-container {
+            background-color: rgba(255, 255, 255, 0.88);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 6px 14px rgba(0, 50, 0, 0.15);
+        }
+
+        /* Table styles */
+        .table thead {
+            background-color: #2e8b57; /* green header */
+            color: white;
+        }
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(46, 139, 87, 0.1);
+        }
+
+        /* Buttons */
+        .btn-success {
+            background-color: #00a896;
+            border-color: #00a896;
+        }
+        .btn-success:hover {
+            background-color: #007f6d;
+            border-color: #007f6d;
+        }
+        .btn-primary {
+            background-color: #2e8b57;
+            border-color: #2e8b57;
+        }
+        .btn-primary:hover {
+            background-color: #1f6540;
+            border-color: #1f6540;
+        }
+        .btn-secondary {
+            background-color: #004d40;
+            border-color: #004d40;
+        }
+        .btn-secondary:hover {
+            background-color: #00352d;
+            border-color: #00352d;
+        }
+        .btn-danger {
+            background-color: #b71c1c;
+            border-color: #b71c1c;
+        }
+        .btn-danger:hover {
+            background-color: #8b1313;
+            border-color: #8b1313;
         }
     </style>
 </head>
@@ -47,37 +105,43 @@
         Home
     </a>
 
-    <h2 class="mb-4">Personnel Records</h2>
-    <a href="/personnel/add" class="btn btn-success mb-3">➕ Add Personnel</a>
+    <div class="card-container">
+        <h2 class="mb-4 text-success">Personnel Records</h2>
+        <a href="/personnel/add" class="btn btn-success mb-3">➕ Add Personnel</a>
 
-    <table class="table table-bordered table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th>Employee ID</th>
-                <th>Name</th>
-                <th>Aadhaar</th>
-                <th>PAN</th>
-                <th>DOB</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for p in personnel %}
-            <tr>
-                <td>{{ p.employee_id }}</td>
-                <td>{{ p.name }}</td>
-                <td>{{ p.aadhaar }}</td>
-                <td>{{ p.pan }}</td>
-                <td>{{ p.dob }}</td>
-                <td>
-                    <a href="/personnel/update/{{ p._id }}" class="btn btn-sm btn-primary">Edit</a>
-                    <a href="/personnel/delete/{{ p._id }}" class="btn btn-sm btn-danger">Delete</a>
-                    <a href="/personnel/{{ p._id }}" class="btn btn-sm btn-secondary">JSON</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <table class="table table-bordered table-hover table-striped">
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Name</th>
+                    <th>Aadhaar</th>
+                    <th>PAN</th>
+                    <th>DOB</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in personnel %}
+                <tr>
+                    <td>{{ p.employee_id }}</td>
+                    <td>{{ p.name }}</td>
+                    <td>{{ p.aadhaar }}</td>
+                    <td>{{ p.pan }}</td>
+                    <td>{{ p.dob }}</td>
+                    <td>
+                        <a href="/personnel/update/{{ p._id }}" class="btn btn-sm btn-primary">Edit</a>
+                        <a href="/personnel/delete/{{ p._id }}" class="btn btn-sm btn-danger">Delete</a>
+                        <a href="/personnel/{{ p._id }}" class="btn btn-sm btn-secondary">JSON</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted">No personnel records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
 </body>
 </html>
