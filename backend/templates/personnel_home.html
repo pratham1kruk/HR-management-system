@@ -12,38 +12,70 @@
   <style>
     body {
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(to right, #f8f9fa, #e9ecef);
+      background: url("{{ url_for('static', filename='assets/img/base2.png') }}") no-repeat center center fixed;
+      background-size: cover;
+      color: #00334d;
     }
     h1 {
       font-weight: 700;
+      color: #004c80; /* Deep blue from image */
+      text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);
     }
     .card {
       border-radius: 14px;
       transition: all 0.3s ease-in-out;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 8px 18px rgba(0, 80, 120, 0.2);
     }
     .card:hover {
       transform: scale(1.03);
-      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
     }
     .btn {
       font-weight: 600;
       border-radius: 25px;
     }
+    /* Theme buttons to match base2.png */
+    .btn-outline-info {
+      color: #0077b6;
+      border-color: #0077b6;
+    }
+    .btn-outline-info:hover {
+      background-color: #0077b6;
+      color: #fff;
+    }
+    .btn-outline-primary {
+      color: #00a896;
+      border-color: #00a896;
+    }
+    .btn-outline-primary:hover {
+      background-color: #00a896;
+      color: #fff;
+    }
+    .btn-outline-warning {
+      color: #ffb703;
+      border-color: #ffb703;
+    }
+    .btn-outline-warning:hover {
+      background-color: #ffb703;
+      color: #fff;
+    }
     footer {
       font-size: 0.9rem;
+      background: rgba(255, 255, 255, 0.9);
     }
   </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
 
   <div class="container py-5 flex-grow-1">
-    <h1 class="mb-5 text-center text-success">📋 Personnel Info Dashboard</h1>
+    <h1 class="mb-5 text-center">📋 Personnel Info Dashboard</h1>
 
     <div class="row g-4 justify-content-center">
 
       <!-- Add Qualification Info -->
       <div class="col-md-4">
-        <div class="card h-100 shadow-sm border-0">
+        <div class="card h-100 border-0">
           <div class="card-body text-center">
             <div class="mb-3"><i class="bi bi-award-fill fs-1 text-info"></i></div>
             <h5 class="card-title">Add Qualification Info</h5>
@@ -55,7 +87,7 @@
 
       <!-- View & Manage -->
       <div class="col-md-4">
-        <div class="card h-100 shadow-sm border-0">
+        <div class="card h-100 border-0">
           <div class="card-body text-center">
             <div class="mb-3"><i class="bi bi-person-lines-fill fs-1 text-primary"></i></div>
             <h5 class="card-title">View & Manage Info</h5>
@@ -67,7 +99,7 @@
 
       <!-- MongoDB Analytics -->
       <div class="col-md-4">
-        <div class="card h-100 shadow-sm border-0">
+        <div class="card h-100 border-0">
           <div class="card-body text-center">
             <div class="mb-3"><i class="bi bi-graph-up fs-1 text-warning"></i></div>
             <h5 class="card-title">Analytics (MongoDB)</h5>
@@ -80,29 +112,11 @@
     </div>
   </div>
 
-  <footer class="text-center py-3 bg-white border-top text-muted">
+  <footer class="text-center py-3 border-top text-muted">
     &copy; 2025 HRMS | Personnel Dashboard
   </footer>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-  // Bootstrap-style form validation
-  (function () {
-    'use strict'
-    const forms = document.querySelectorAll('.needs-validation')
-
-    Array.from(forms).forEach(function (form) {
-      form.addEventListener('submit', function (event) {
-        if (!form.checkValidity()) {
-          event.preventDefault()
-          event.stopPropagation()
-          document.getElementById('formAlert').classList.remove('d-none')
-        }
-        form.classList.add('was-validated')
-      }, false)
-    })
-  })();
-  </script>
 </body>
 </html>
