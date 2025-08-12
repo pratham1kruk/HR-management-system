@@ -13,7 +13,13 @@
 <body class="bg-light">
 
 <div class="container py-5">
-    <h2 class="text-primary mb-4">📋 Employee Records (Tabbed View)</h2>
+    <!-- Header with Home Button -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary mb-0">📋 Employee Records </h2>
+        <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">
+            🏠 Home
+        </a>
+    </div>
 
     <!-- Search Bar -->
     <div class="mb-3">
