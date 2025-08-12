@@ -4,6 +4,7 @@ from app import mongo    # <- uses the same 'mongo' you already created in your 
 import pdfkit
 import shutil
 from datetime import datetime
+from pytz import timezone
 
 mongo_analytics_bp = Blueprint("mongo_analytics", __name__, url_prefix="/personnel/analytics")
 
@@ -91,6 +92,7 @@ def mongo_stats_home():
     # pass to template
     return render_template("mongo_stats.html", **stats)
 
+
 # ----------------------------
 # POST: download PDF report
 # ----------------------------
@@ -99,7 +101,13 @@ def mongo_download_report():
     # form data
     company_name = request.form.get("company_name", "").strip() or "Unknown Company"
     company_details = request.form.get("company_details", "").strip() or ""
-    generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # 🕒 Generate Indian date and time
+    india_tz = timezone("Asia/Kolkata")
+    now_ist = datetime.now(india_tz)
+    generated_on = now_ist.strftime("%Y-%m-%d")
+    generated_time = now_ist.strftime("%H:%M:%S")
+
     stats = _collect_mongo_stats()
 
     # Render report HTML
@@ -107,27 +115,24 @@ def mongo_download_report():
         "mongo_stats_report.html",
         company_name=company_name,
         company_details=company_details,
-        generated_at=generated_at,
+        generated_on=generated_on,
+        generated_time=generated_time,
         **stats
     )
 
-    # Find wkhtmltopdf binary using shutil.which (option 1)
+    # Find wkhtmltopdf binary using shutil.which
     wk_path = shutil.which("wkhtmltopdf")
     if wk_path is None:
-        # try common docker path
         alt_path = "/usr/local/bin/wkhtmltopdf"
         if shutil.which(alt_path):
             wk_path = alt_path
 
     if wk_path is None:
-        # No wkhtmltopdf available: return a helpful message
-        # You can also flash and redirect to the page
         flash("wkhtmltopdf not found in container. Install it or provide its path. PDF generation unavailable.", "danger")
         return redirect(url_for("mongo_analytics.mongo_stats_home"))
 
     # Configure pdfkit
     config = pdfkit.configuration(wkhtmltopdf=wk_path)
-    # Options to make PDF look good
     options = {
         "page-size": "A4",
         "encoding": "UTF-8",
@@ -136,7 +141,7 @@ def mongo_download_report():
         "margin-bottom": "15mm",
         "margin-left": "12mm",
         "margin-right": "12mm",
-        "enable-local-file-access": None  # necessary for embedded CSS/images
+        "enable-local-file-access": None
     }
 
     try:
@@ -146,8 +151,9 @@ def mongo_download_report():
         flash(f"Failed to generate PDF: {e}", "danger")
         return redirect(url_for("mongo_analytics.mongo_stats_home"))
 
+    # Send PDF as response
     response = make_response(pdf)
     response.headers["Content-Type"] = "application/pdf"
-    filename = f"Mongo_Analytics_Report_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
+    filename = f"Mongo_Analytics_Report_{now_ist.strftime('%Y%m%d_%H%M')}.pdf"
     response.headers["Content-Disposition"] = f"attachment; filename={filename}"
     return response
