@@ -4,6 +4,7 @@ from sqlalchemy import text
 from datetime import datetime
 import pdfkit
 import shutil  # ✅ for auto-detecting wkhtmltopdf path
+import pytz  # ✅ for timezone support
 
 analytics_bp = Blueprint("analytics", __name__, url_prefix="/analytics")
 
@@ -103,19 +104,19 @@ def stats_home():
     return render_template("stats.html", stats=stats)
 
 
-# ------------------------------
-# PDF download route
-# ------------------------------
 @analytics_bp.route("/download", methods=["POST"])
 def download_report():
     company_name = request.form.get("company_name", "Unknown Company")
     company_details = request.form.get("company_details", "")
     stats = _collect_stats()
 
-    # 📅 Current date & time for template
-    current_year = datetime.now().year
-    generated_on = datetime.now().strftime("%Y-%m-%d")
-    generated_at = datetime.now().strftime("%H:%M:%S")
+    # ✅ Use India Standard Time
+    ist = pytz.timezone("Asia/Kolkata")
+    now_ist = datetime.now(ist)
+
+    current_year = now_ist.year
+    current_date = now_ist.strftime("%Y-%m-%d")
+    current_time = now_ist.strftime("%H:%M:%S")
 
     # Render HTML for PDF
     html = render_template(
@@ -124,8 +125,8 @@ def download_report():
         company_name=company_name,
         company_details=company_details,
         report_year=current_year,
-        generated_on=generated_on,
-        generated_at=generated_at
+        generated_on=current_date,
+        generated_time=current_time
     )
 
     # ✅ Auto-detect wkhtmltopdf path
@@ -135,13 +136,11 @@ def download_report():
 
     config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
 
-    # Generate PDF
     try:
         pdf = pdfkit.from_string(html, False, configuration=config)
     except Exception as e:
         return f"Failed to generate PDF: {e}", 500
 
-    # Send as download
     response = make_response(pdf)
     response.headers["Content-Type"] = "application/pdf"
     filename = f"HRMS_Report_{current_year}.pdf"
