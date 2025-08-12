@@ -17,21 +17,26 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            background: url("{{ url_for('static', filename='assets/img/base1.png') }}") no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            margin: 0;
         }
 
         h1 {
             font-weight: 700;
+            color: #006b6b; /* Teal-like blue-green to match image */
         }
 
         .card {
             border-radius: 14px;
             transition: all 0.3s ease-in-out;
+            background: rgba(255, 255, 255, 0.88);
         }
 
         .card:hover {
             transform: scale(1.03);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 12px 20px rgba(0, 100, 100, 0.15);
         }
 
         .card-title {
@@ -42,19 +47,44 @@
             font-size: 0.95rem;
         }
 
-        .btn {
-            font-weight: 600;
-            border-radius: 25px;
+        /* Updated button colors to match background tones */
+        .btn-outline-primary {
+            border-color: #1e90ff;
+            color: #1e90ff;
+        }
+        .btn-outline-primary:hover {
+            background-color: #1e90ff;
+            color: white;
+        }
+
+        .btn-outline-success {
+            border-color: #28a745;
+            color: #28a745;
+        }
+        .btn-outline-success:hover {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-outline-warning {
+            border-color: #ffb400;
+            color: #ffb400;
+        }
+        .btn-outline-warning:hover {
+            background-color: #ffb400;
+            color: white;
         }
 
         footer {
             font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.85);
+            color: #006b6b;
         }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
     <div class="container py-5 flex-grow-1">
-        <h1 class="mb-5 text-center text-primary">👥 HR Management System</h1>
+        <h1 class="mb-5 text-center">👥 HR Management System</h1>
 
         <div class="row g-4 justify-content-center">
             <!-- Employee Management (PostgreSQL) -->
@@ -95,7 +125,7 @@
         </div>
     </div>
 
-    <footer class="text-center py-3 bg-white border-top text-muted">
+    <footer class="text-center py-3 border-top">
         &copy; 2025 HRMS | All rights reserved
     </footer>
 </body>
