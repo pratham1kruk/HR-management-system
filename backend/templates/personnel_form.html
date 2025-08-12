@@ -1,175 +1,220 @@
+<!-- personnel_form.html (Blue Theme with Dynamic Background) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>{{ action }} Personnel Info</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            /* Dynamic background for portability */
+            background: url("{{ url_for('static', filename='assets/img/bg_blue.jpg') }}") no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Segoe UI', sans-serif;
+            color: #fff;
+        }
+        .form-section {
+            background: rgba(0, 123, 255, 0.85);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+            max-width: 900px;
+            margin: auto;
+        }
+        h2, h5, h6 {
+            color: #eaf4ff;
+        }
+        label {
+            font-weight: bold;
+            color: #f8f9fa;
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+        }
+        .btn-primary {
+            background-color: #004a99;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #003366;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border: none;
+        }
+        .alert {
+            border-radius: 10px;
+        }
+    </style>
 </head>
-<body class="container py-4">
-    <h2 class="mb-4">{{ action }} Personnel Info</h2>
+<body class="py-4">
+<div class="container">
+    <div class="form-section">
+        <h2 class="mb-4">{{ action }} Personnel Info</h2>
 
-    <div id="formAlert" class="alert alert-danger d-none" role="alert">
-        Please correct the highlighted fields before submitting the form.
+        <div id="formAlert" class="alert alert-danger d-none" role="alert">
+            Please correct the highlighted fields before submitting the form.
+        </div>
+
+        <form class="needs-validation" novalidate method="POST">
+            <div class="row mb-3">
+                <div class="col">
+                    <label>Employee ID</label>
+                    <input type="text" name="employee_id" class="form-control" value="{{ data.get('employee_id', '') }}" required>
+                </div>
+                <div class="col">
+                    <label>Name</label>
+                    <input type="text" name="name" class="form-control" value="{{ data.get('name', '') }}" required>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col">
+                    <label>Aadhaar</label>
+                    <input type="text" name="aadhaar" pattern="\d{4}-\d{4}-\d{4}" class="form-control" value="{{ data.get('aadhaar', '') }}" required>
+                    <div class="invalid-feedback">Enter Aadhaar in format: 1234-5678-9012</div>
+                </div>
+                <div class="col">
+                    <label>PAN</label>
+                    <input type="text" name="pan" class="form-control" value="{{ data.get('pan', '') }}">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col">
+                    <label>DOB</label>
+                    <input type="date" name="dob" class="form-control" value="{{ data.get('dob', '') }}">
+                </div>
+                <div class="col">
+                    <label>Gender</label>
+                    <select name="gender" class="form-select" required>
+                        <option value="">-- Select Gender --</option>
+                        <option value="Male" {{ 'selected' if data.get('gender') == 'Male' }}>Male</option>
+                        <option value="Female" {{ 'selected' if data.get('gender') == 'Female' }}>Female</option>
+                        <option value="Other" {{ 'selected' if data.get('gender') == 'Other' }}>Other</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <label>Blood Group</label>
+                    <select name="blood_group" class="form-select">
+                        <option value="">-- Select Blood Group --</option>
+                        {% for group in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] %}
+                        <option value="{{ group }}" {{ 'selected' if data.get('blood_group') == group }}>{{ group }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <hr>
+            <h5>Residence</h5>
+            <div class="row mb-3">
+                <div class="col">
+                    <label>Address</label>
+                    <input type="text" name="address" class="form-control" value="{{ data.get('residence', {}).get('address', '') }}">
+                </div>
+                <div class="col">
+                    <label>City</label>
+                    <input type="text" name="city" class="form-control" value="{{ data.get('residence', {}).get('city', '') }}">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col">
+                    <label>State</label>
+                    <input type="text" name="state" class="form-control" value="{{ data.get('residence', {}).get('state', '') }}">
+                </div>
+                <div class="col">
+                    <label>Zip</label>
+                    <input type="text" name="zip" class="form-control" value="{{ data.get('residence', {}).get('zip', '') }}">
+                </div>
+            </div>
+
+            <hr>
+            <h5>Contact</h5>
+            <div class="row mb-3">
+                <div class="col">
+                    <label>Phone</label>
+                    <input type="text" name="phone" class="form-control" value="{{ data.get('contact', {}).get('phone', '') }}">
+                </div>
+                <div class="col">
+                    <label>Email</label>
+                    <input type="email" name="email" class="form-control" value="{{ data.get('contact', {}).get('email', '') }}" required>
+                    <div class="invalid-feedback">Please enter a valid email.</div>
+                </div>
+            </div>
+
+            <hr>
+            <h5>Emergency Contact</h5>
+            <div class="row mb-3">
+                <div class="col">
+                    <label>Name</label>
+                    <input type="text" name="emergency_name" class="form-control" value="{{ data.get('emergency_contact', {}).get('name', '') }}">
+                </div>
+                <div class="col">
+                    <label>Phone</label>
+                    <input type="text" name="emergency_phone" class="form-control" value="{{ data.get('emergency_contact', {}).get('phone', '') }}">
+                </div>
+            </div>
+
+            <hr>
+            <h5>Family</h5>
+            <div class="row mb-3">
+                <div class="col">
+                    <label>Marital Status</label>
+                    <select name="marital_status" class="form-select">
+                        <option value="">-- Select Status --</option>
+                        {% for status in ['Single', 'Married', 'Divorced', 'Widowed'] %}
+                        <option value="{{ status }}" {{ 'selected' if data.get('family', {}).get('marital_status') == status }}>{{ status }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col">
+                    <label>No. of Dependents</label>
+                    <input type="number" name="no_of_dependents" class="form-control" value="{{ data.get('family', {}).get('no_of_dependents', 0) }}">
+                </div>
+            </div>
+
+            <h6>Dependents (Up to 3)</h6>
+            {% for i in range(3) %}
+            <div class="row mb-2">
+                <div class="col">
+                    <input type="text" name="dep_name_{{ i+1 }}" class="form-control" placeholder="Dependent Name"
+                        value="{{ data.get('family', {}).get('dependents', [])|default([])|length > i and data['family']['dependents'][i]['name'] or '' }}">
+                </div>
+                <div class="col">
+                    <input type="text" name="dep_relation_{{ i+1 }}" class="form-control" placeholder="Relation"
+                        value="{{ data.get('family', {}).get('dependents', [])|default([])|length > i and data['family']['dependents'][i]['relation'] or '' }}">
+                </div>
+                <div class="col">
+                    <input type="number" name="dep_age_{{ i+1 }}" class="form-control" placeholder="Age"
+                        value="{{ data.get('family', {}).get('dependents', [])|default([])|length > i and data['family']['dependents'][i]['age'] or '' }}">
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="mt-4 text-end">
+                <button type="submit" class="btn btn-primary btn-lg">{{ action }}</button>
+                <a href="/personnel/" class="btn btn-secondary btn-lg">Cancel</a>
+            </div>
+        </form>
     </div>
+</div>
 
-    <form class="needs-validation" novalidate method="POST">
-
-        <div class="row mb-3">
-            <div class="col">
-                <label>Employee ID</label>
-                <input type="text" name="employee_id" class="form-control" value="{{ data.get('employee_id', '') }}" required>
-            </div>
-            <div class="col">
-                <label>Name</label>
-                <input type="text" name="name" class="form-control" value="{{ data.get('name', '') }}" required>
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <div class="col">
-                <label>Aadhaar</label>
-                <input type="text" name="aadhaar" pattern="\d{4}-\d{4}-\d{4}" class="form-control" value="{{ data.get('aadhaar', '') }}" required>
-                <div class="invalid-feedback">Enter Aadhaar in format: 1234-5678-9012</div>
-            </div>
-            <div class="col">
-                <label>PAN</label>
-                <input type="text" name="pan" class="form-control" value="{{ data.get('pan', '') }}">
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <div class="col">
-                <label>DOB</label>
-                <input type="date" name="dob" class="form-control" value="{{ data.get('dob', '') }}">
-            </div>
-            <div class="col">
-                <label>Gender</label>
-                <select name="gender" class="form-select" required>
-                    <option value="">-- Select Gender --</option>
-                    <option value="Male" {{ 'selected' if data.get('gender') == 'Male' }}>Male</option>
-                    <option value="Female" {{ 'selected' if data.get('gender') == 'Female' }}>Female</option>
-                    <option value="Other" {{ 'selected' if data.get('gender') == 'Other' }}>Other</option>
-                </select>
-            </div>
-            <div class="col">
-                <label>Blood Group</label>
-                <select name="blood_group" class="form-select">
-                    <option value="">-- Select Blood Group --</option>
-                    {% for group in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] %}
-                    <option value="{{ group }}" {{ 'selected' if data.get('blood_group') == group }}>{{ group }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-
-        <hr>
-        <h5>Residence</h5>
-        <div class="row mb-3">
-            <div class="col">
-                <label>Address</label>
-                <input type="text" name="address" class="form-control" value="{{ data.get('residence', {}).get('address', '') }}">
-            </div>
-            <div class="col">
-                <label>City</label>
-                <input type="text" name="city" class="form-control" value="{{ data.get('residence', {}).get('city', '') }}">
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col">
-                <label>State</label>
-                <input type="text" name="state" class="form-control" value="{{ data.get('residence', {}).get('state', '') }}">
-            </div>
-            <div class="col">
-                <label>Zip</label>
-                <input type="text" name="zip" class="form-control" value="{{ data.get('residence', {}).get('zip', '') }}">
-            </div>
-        </div>
-
-        <hr>
-        <h5>Contact</h5>
-        <div class="row mb-3">
-            <div class="col">
-                <label>Phone</label>
-                <input type="text" name="phone" class="form-control" value="{{ data.get('contact', {}).get('phone', '') }}">
-            </div>
-            <div class="col">
-                <label>Email</label>
-                <input type="email" name="email" class="form-control" value="{{ data.get('contact', {}).get('email', '') }}" required>
-                <div class="invalid-feedback">Please enter a valid email.</div>
-            </div>
-        </div>
-
-        <hr>
-        <h5>Emergency Contact</h5>
-        <div class="row mb-3">
-            <div class="col">
-                <label>Name</label>
-                <input type="text" name="emergency_name" class="form-control" value="{{ data.get('emergency_contact', {}).get('name', '') }}">
-            </div>
-            <div class="col">
-                <label>Phone</label>
-                <input type="text" name="emergency_phone" class="form-control" value="{{ data.get('emergency_contact', {}).get('phone', '') }}">
-            </div>
-        </div>
-
-        <hr>
-        <h5>Family</h5>
-        <div class="row mb-3">
-            <div class="col">
-                <label>Marital Status</label>
-                <select name="marital_status" class="form-select">
-                    <option value="">-- Select Status --</option>
-                    {% for status in ['Single', 'Married', 'Divorced', 'Widowed'] %}
-                    <option value="{{ status }}" {{ 'selected' if data.get('family', {}).get('marital_status') == status }}>{{ status }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col">
-                <label>No. of Dependents</label>
-                <input type="number" name="no_of_dependents" class="form-control" value="{{ data.get('family', {}).get('no_of_dependents', 0) }}">
-            </div>
-        </div>
-
-        <h6>Dependents (Up to 3)</h6>
-        {% for i in range(3) %}
-        <div class="row mb-2">
-            <div class="col">
-                <input type="text" name="dep_name_{{ i+1 }}" class="form-control" placeholder="Dependent Name"
-                       value="{{ data.get('family', {}).get('dependents', [])|default([])|length > i and data['family']['dependents'][i]['name'] or '' }}">
-            </div>
-            <div class="col">
-                <input type="text" name="dep_relation_{{ i+1 }}" class="form-control" placeholder="Relation"
-                       value="{{ data.get('family', {}).get('dependents', [])|default([])|length > i and data['family']['dependents'][i]['relation'] or '' }}">
-            </div>
-            <div class="col">
-                <input type="number" name="dep_age_{{ i+1 }}" class="form-control" placeholder="Age"
-                       value="{{ data.get('family', {}).get('dependents', [])|default([])|length > i and data['family']['dependents'][i]['age'] or '' }}">
-            </div>
-        </div>
-        {% endfor %}
-
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary">{{ action }}</button>
-            <a href="/personnel/" class="btn btn-secondary">Cancel</a>
-        </div>
-    </form>
-
-    <script>
-        (function () {
-            'use strict';
-            const forms = document.querySelectorAll('.needs-validation');
-
-            Array.from(forms).forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        document.getElementById('formAlert').classList.remove('d-none');
-                    }
-                    form.classList.add('was-validated');
-                }, false);
-            });
-        })();
-    </script>
+<script>
+    (function () {
+        'use strict';
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    document.getElementById('formAlert').classList.remove('d-none');
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
 </body>
 </html>
