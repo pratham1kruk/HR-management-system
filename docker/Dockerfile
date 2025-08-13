@@ -13,23 +13,26 @@ WORKDIR /app
 # -----------------------------
 # 3️⃣ Install system dependencies
 # -----------------------------
-# Install dependencies for wkhtmltopdf
+# Install dependencies first
 RUN apt-get update && apt-get install -y \
     xfonts-75dpi \
     xfonts-base \
     libxrender1 \
     libfontconfig1 \
     libxext6 \
+    fontconfig \
+    libjpeg62-turbo \
+    libssl1.1 \
     wget \
     gnupg \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Install wkhtmltopdf manually (buster version is more reliable)
+# Install wkhtmltopdf manually
 RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb \
     && dpkg -i wkhtmltox_0.12.6-1.buster_amd64.deb \
-    && apt-get install -f -y \
     && rm wkhtmltox_0.12.6-1.buster_amd64.deb
+
 
 # Verify wkhtmltopdf installation
 RUN wkhtmltopdf --version
