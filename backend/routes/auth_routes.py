@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from werkzeug.security import generate_password_hash, check_password_hash
 from models.user import User
 from models.postgres_models import db
-from utils.security import generate_otp, send_email_otp, send_sms_otp
+from utils.security import initiate_email_otp_flow, verify_otp as verify_stored_otp
 from utils.decorator import login_required
 import logging
 
@@ -11,8 +11,9 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 # Allowed roles
 ALLOWED_ROLES = ["user", "viewer", "editor"]
 
+
 # -----------------------------
-# Home page for auth (optional landing)
+# Home page for auth
 # -----------------------------
 @auth_bp.route("/home")
 @login_required
@@ -21,11 +22,10 @@ def auth_home():
 
 
 # -----------------------------
-# Sign Up / Register
+# Sign Up
 # -----------------------------
 @auth_bp.route("/signup", methods=["GET", "POST"])
 def signup():
-    # Redirect logged-in users
     if session.get("user_id"):
         return redirect(url_for("auth.auth_home"))
 
@@ -73,17 +73,15 @@ def signup():
             db.session.rollback()
             logging.error(f"Signup Error: {e}")
             flash("Failed to create account. Try again later.", "danger")
-            return redirect(url_for("auth.signup"))
 
     return render_template("signup.html")
 
 
 # -----------------------------
-# Sign In / Login
+# Sign In
 # -----------------------------
 @auth_bp.route("/signin", methods=["GET", "POST"])
 def signin():
-    # Redirect logged-in users
     if session.get("user_id"):
         return redirect(url_for("auth.auth_home"))
 
@@ -103,7 +101,6 @@ def signin():
             return redirect(url_for("auth.auth_home"))
 
         flash("Invalid credentials!", "danger")
-        return redirect(url_for("auth.signin"))
 
     return render_template("signin.html")
 
@@ -114,32 +111,21 @@ def signin():
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
-        email_or_phone = request.form["email_or_phone"].strip()
-        user = User.query.filter(
-            (User.email == email_or_phone) |
-            (User.work_phone == email_or_phone)
-        ).first()
+        email = request.form["email_or_phone"].strip()
 
+        user = User.query.filter(User.email == email).first()
         if not user:
             flash("User not found!", "danger")
             return redirect(url_for("auth.forgot_password"))
 
-        otp = generate_otp()
-        session["otp"] = otp
-        session["reset_user_id"] = user.id
-
         try:
-            if "@" in email_or_phone:
-                send_email_otp(email_or_phone, otp)
-            else:
-                send_sms_otp(email_or_phone, otp)
+            initiate_email_otp_flow(email)
+            session["reset_user_id"] = user.id
+            flash("OTP sent to your email. Please verify.", "info")
+            return redirect(url_for("auth.verify_otp"))
         except Exception as e:
             logging.error(f"OTP send error: {e}")
             flash("Failed to send OTP. Please try again.", "danger")
-            return redirect(url_for("auth.forgot_password"))
-
-        flash("OTP sent! Please verify.", "info")
-        return redirect(url_for("auth.verify_otp"))
 
     return render_template("forget_password.html")
 
@@ -150,13 +136,15 @@ def forgot_password():
 @auth_bp.route("/verify-otp", methods=["GET", "POST"])
 def verify_otp():
     if request.method == "POST":
+        email = request.form["email"].strip()
         otp_input = request.form["otp"].strip()
-        if otp_input == session.get("otp"):
-            session.pop("otp", None)
-            flash("OTP verified! Set your new password.", "success")
+
+        valid, message = verify_stored_otp(email, otp_input)
+        if valid:
+            flash("OTP verified! Please set your new password.", "success")
             return redirect(url_for("auth.reset_password"))
-        flash("Invalid OTP!", "danger")
-        return redirect(url_for("auth.verify_otp"))
+        else:
+            flash(message, "danger")
 
     return render_template("otp_verification.html")
 
@@ -177,18 +165,20 @@ def reset_password():
         user_id = session.get("reset_user_id")
         user = User.query.get(user_id)
 
-        if user:
-            try:
-                user.password_hash = generate_password_hash(new_password)
-                db.session.commit()
-                session.pop("reset_user_id", None)
-                flash("Password updated successfully! Please login.", "success")
-                return redirect(url_for("auth.signin"))
-            except Exception as e:
-                db.session.rollback()
-                logging.error(f"Reset Password Error: {e}")
-                flash("Failed to update password. Try again.", "danger")
-                return redirect(url_for("auth.reset_password"))
+        if not user:
+            flash("Session expired. Please request OTP again.", "danger")
+            return redirect(url_for("auth.forgot_password"))
+
+        try:
+            user.password_hash = generate_password_hash(new_password)
+            db.session.commit()
+            session.pop("reset_user_id", None)
+            flash("Password updated successfully! Please login.", "success")
+            return redirect(url_for("auth.signin"))
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Reset Password Error: {e}")
+            flash("Failed to update password. Try again.", "danger")
 
     return render_template("reset_password.html")
 
@@ -214,12 +204,10 @@ def profile():
             user.zip_code = request.form.get("zip_code")
             db.session.commit()
             flash("Profile updated successfully.", "success")
-            return redirect(url_for("auth.profile"))
         except Exception as e:
             db.session.rollback()
             logging.error(f"Profile Update Error: {e}")
             flash("Failed to update profile. Try again.", "danger")
-            return redirect(url_for("auth.profile"))
 
     return render_template("profile.html", user=user)
 
