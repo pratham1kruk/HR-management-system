@@ -10,9 +10,14 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 ALLOWED_ROLES = ["user", "viewer", "editor"]
 
+# -------------------------
 # Landing page BEFORE login
+# -------------------------
 @auth_bp.route("/")
 def auth_home():
+    # Redirect logged-in users to main page
+    if session.get("user_id"):
+        return redirect(url_for("home"))
     return render_template("auth_home.html")
 
 # -------------------------
@@ -21,7 +26,7 @@ def auth_home():
 @auth_bp.route("/signup", methods=["GET", "POST"])
 def signup():
     if session.get("user_id"):
-        return redirect(url_for("home"))  # Already logged in → main page
+        return redirect(url_for("home"))
 
     if request.method == "POST":
         username = request.form["username"].strip()
@@ -76,7 +81,7 @@ def signup():
 @auth_bp.route("/signin", methods=["GET", "POST"])
 def signin():
     if session.get("user_id"):
-        return redirect(url_for("home"))  # Already logged in → main page
+        return redirect(url_for("home"))
 
     if request.method == "POST":
         username_or_email = request.form["username_or_email"].strip()
@@ -91,7 +96,7 @@ def signin():
             session["user_id"] = user.id
             session["role"] = user.role
             flash("Logged in successfully!", "success")
-            return redirect(url_for("home"))  # FIX: go to main page
+            return redirect(url_for("home"))
         else:
             flash("Invalid credentials!", "danger")
 
@@ -104,8 +109,8 @@ def signin():
 def forgot_password():
     if request.method == "POST":
         email = request.form["email_or_phone"].strip()
-
         user = User.query.filter(User.email == email).first()
+
         if not user:
             flash("User not found!", "danger")
             return redirect(url_for("auth.forgot_password"))
@@ -216,4 +221,4 @@ def profile():
 def logout():
     session.clear()
     flash("Logged out successfully.", "info")
-    return redirect(url_for("auth.signin"))
+    return redirect(url_for("auth.auth_home"))
