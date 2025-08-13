@@ -32,6 +32,7 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./db_init/init_employee.sql:/docker-entrypoint-initdb.d/init_employee.sql
       - ./db_init/professional_info.sql:/docker-entrypoint-initdb.d/professional_info.sql
+      - ./db_init/professional_info.sql:/docker-entrypoint-initdb.d/accounts.sql
 
   mongo:
     image: corpusops/mongo:latest
