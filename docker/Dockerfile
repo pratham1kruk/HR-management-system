@@ -11,12 +11,22 @@ WORKDIR /app
 # Copy requirements and install
 COPY backend/requirements.txt .
 
+# Replace the wkhtmltopdf install step
 RUN apt-get update && apt-get install -y \
-    wkhtmltopdf \
+    xfonts-75dpi \
+    xfonts-base \
     libxrender1 \
     libfontconfig1 \
     libxext6 \
+    wget \
     && rm -rf /var/lib/apt/lists/*
+
+# Install wkhtmltopdf manually
+RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb \
+    && dpkg -i wkhtmltox_0.12.6-1.buster_amd64.deb \
+    && apt-get install -f -y \
+    && rm wkhtmltox_0.12.6-1.buster_amd64.deb
+
 
 
 RUN pip install --upgrade pip && \
