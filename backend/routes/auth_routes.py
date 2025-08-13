@@ -4,6 +4,7 @@ from models.user import User
 from models.postgres_models import db
 from utils.security import generate_otp, send_email_otp, send_sms_otp
 from utils.decorator import login_required
+import logging
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -24,6 +25,10 @@ def auth_home():
 # -----------------------------
 @auth_bp.route("/signup", methods=["GET", "POST"])
 def signup():
+    # Redirect logged-in users
+    if session.get("user_id"):
+        return redirect(url_for("auth.auth_home"))
+
     if request.method == "POST":
         username = request.form["username"].strip()
         email = request.form["email"].strip()
@@ -42,7 +47,6 @@ def signup():
             flash("Username or email already exists!", "danger")
             return redirect(url_for("auth.signup"))
 
-        # Create user with hashed password
         user = User(
             username=username,
             email=email,
@@ -59,11 +63,17 @@ def signup():
             zip_code=request.form.get("zip_code")
         )
         user.password_hash = generate_password_hash(password)
-        db.session.add(user)
-        db.session.commit()
 
-        flash("Account created successfully! Please login.", "success")
-        return redirect(url_for("auth.signin"))
+        try:
+            db.session.add(user)
+            db.session.commit()
+            flash("Account created successfully! Please login.", "success")
+            return redirect(url_for("auth.signin"))
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Signup Error: {e}")
+            flash("Failed to create account. Try again later.", "danger")
+            return redirect(url_for("auth.signup"))
 
     return render_template("signup.html")
 
@@ -73,6 +83,10 @@ def signup():
 # -----------------------------
 @auth_bp.route("/signin", methods=["GET", "POST"])
 def signin():
+    # Redirect logged-in users
+    if session.get("user_id"):
+        return redirect(url_for("auth.auth_home"))
+
     if request.method == "POST":
         username_or_email = request.form["username_or_email"].strip()
         password = request.form["password"]
@@ -119,7 +133,8 @@ def forgot_password():
                 send_email_otp(email_or_phone, otp)
             else:
                 send_sms_otp(email_or_phone, otp)
-        except Exception:
+        except Exception as e:
+            logging.error(f"OTP send error: {e}")
             flash("Failed to send OTP. Please try again.", "danger")
             return redirect(url_for("auth.forgot_password"))
 
@@ -163,11 +178,17 @@ def reset_password():
         user = User.query.get(user_id)
 
         if user:
-            user.password_hash = generate_password_hash(new_password)
-            db.session.commit()
-            session.pop("reset_user_id", None)
-            flash("Password updated successfully! Please login.", "success")
-            return redirect(url_for("auth.signin"))
+            try:
+                user.password_hash = generate_password_hash(new_password)
+                db.session.commit()
+                session.pop("reset_user_id", None)
+                flash("Password updated successfully! Please login.", "success")
+                return redirect(url_for("auth.signin"))
+            except Exception as e:
+                db.session.rollback()
+                logging.error(f"Reset Password Error: {e}")
+                flash("Failed to update password. Try again.", "danger")
+                return redirect(url_for("auth.reset_password"))
 
     return render_template("reset_password.html")
 
@@ -180,19 +201,25 @@ def reset_password():
 def profile():
     user = User.query.get(session["user_id"])
     if request.method == "POST":
-        user.first_name = request.form.get("first_name")
-        user.last_name = request.form.get("last_name")
-        user.job_title = request.form.get("job_title")
-        user.work_phone = request.form.get("work_phone")
-        user.company_name = request.form.get("company_name")
-        user.country = request.form.get("country")
-        user.address = request.form.get("address")
-        user.city = request.form.get("city")
-        user.state = request.form.get("state")
-        user.zip_code = request.form.get("zip_code")
-        db.session.commit()
-        flash("Profile updated successfully.", "success")
-        return redirect(url_for("auth.profile"))
+        try:
+            user.first_name = request.form.get("first_name")
+            user.last_name = request.form.get("last_name")
+            user.job_title = request.form.get("job_title")
+            user.work_phone = request.form.get("work_phone")
+            user.company_name = request.form.get("company_name")
+            user.country = request.form.get("country")
+            user.address = request.form.get("address")
+            user.city = request.form.get("city")
+            user.state = request.form.get("state")
+            user.zip_code = request.form.get("zip_code")
+            db.session.commit()
+            flash("Profile updated successfully.", "success")
+            return redirect(url_for("auth.profile"))
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Profile Update Error: {e}")
+            flash("Failed to update profile. Try again.", "danger")
+            return redirect(url_for("auth.profile"))
 
     return render_template("profile.html", user=user)
 
