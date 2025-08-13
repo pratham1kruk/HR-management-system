@@ -13,7 +13,7 @@ load_dotenv()
 # -----------------------------
 # Initialize Flask App
 # -----------------------------
-app = Flask(__name__)
+app = Flask(__name__, template_folder="backend/templates")
 CORS(app)
 
 # Load config from config.py
