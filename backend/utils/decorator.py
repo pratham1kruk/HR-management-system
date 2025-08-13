@@ -9,7 +9,7 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if "user_id" not in session:
             flash("Please login to access this page.", "warning")
-            return redirect(url_for("auth.login"))
+            return redirect(url_for("auth.signin"))
         return f(*args, **kwargs)
     return decorated_function
 
