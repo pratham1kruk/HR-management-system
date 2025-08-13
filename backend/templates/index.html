@@ -80,9 +80,24 @@
             background: rgba(255, 255, 255, 0.85);
             color: #006b6b;
         }
+
+        /* Navbar customization for profile button */
+        .navbar-brand.btn {
+            font-weight: 600;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
+
+    <!-- Top Navbar with Profile Button -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
+        <a class="navbar-brand btn btn-outline-primary" href="{{ url_for('auth.profile') }}">
+            Profile
+        </a>
+    </nav>
+
+    <!-- Main Content -->
     <div class="container py-5 flex-grow-1">
         <h1 class="mb-5 text-center">👥 HR Management System</h1>
 
@@ -99,7 +114,7 @@
                 </div>
             </div>
 
-            <!-- Updated MongoDB: Personal Info -->
+            <!-- MongoDB: Personal Info -->
             <div class="col-md-4">
                 <div class="card h-100 shadow-sm border-0">
                     <div class="card-body text-center">
@@ -125,6 +140,7 @@
         </div>
     </div>
 
+    <!-- Footer -->
     <footer class="text-center py-3 border-top">
         &copy; 2025 HRMS | All rights reserved
     </footer>
