@@ -31,7 +31,6 @@ db.init_app(app)
 # -----------------------------
 app.config["MONGO_URI"] = Config.MONGO_URI
 mongo = PyMongo(app)
-
 # Make mongo accessible app-wide
 app.config["MONGO"] = mongo
 
@@ -59,15 +58,12 @@ from utils.decorator import login_required
 # Home Page (requires login)
 # -----------------------------
 @app.route("/")
-@login_required
-@app.route("/")
 def home():
     # If user is logged in → main page
     if session.get("user_id"):
         return render_template("index.html")
     # If not logged in → landing page
     return redirect(url_for("auth.auth_home"))
-
 
 # -----------------------------
 # Optional: Create tables on first run
