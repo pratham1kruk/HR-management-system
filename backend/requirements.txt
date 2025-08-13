@@ -11,3 +11,4 @@ Werkzeug==2.3.7
 requests
 Flask-Caching
 cachetools
+sib-api-v3-sdk

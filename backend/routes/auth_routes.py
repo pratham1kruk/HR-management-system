@@ -2,28 +2,19 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from werkzeug.security import generate_password_hash, check_password_hash
 from models.user import User
 from models.postgres_models import db
-from utils.security import initiate_email_otp_flow, verify_otp as verify_stored_otp
 from utils.decorator import login_required
+from utils.security import initiate_email_otp_flow, verify_stored_otp
 import logging
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
-# Allowed roles
 ALLOWED_ROLES = ["user", "viewer", "editor"]
 
-
-# -----------------------------
-# Home page for auth
-# -----------------------------
 @auth_bp.route("/home")
 @login_required
 def auth_home():
     return render_template("auth_home.html")
 
-
-# -----------------------------
-# Sign Up
-# -----------------------------
 @auth_bp.route("/signup", methods=["GET", "POST"])
 def signup():
     if session.get("user_id"):
@@ -76,10 +67,6 @@ def signup():
 
     return render_template("signup.html")
 
-
-# -----------------------------
-# Sign In
-# -----------------------------
 @auth_bp.route("/signin", methods=["GET", "POST"])
 def signin():
     if session.get("user_id"):
@@ -104,10 +91,6 @@ def signin():
 
     return render_template("signin.html")
 
-
-# -----------------------------
-# Forgot Password
-# -----------------------------
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
@@ -121,6 +104,7 @@ def forgot_password():
         try:
             initiate_email_otp_flow(email)
             session["reset_user_id"] = user.id
+            session["reset_email"] = email
             flash("OTP sent to your email. Please verify.", "info")
             return redirect(url_for("auth.verify_otp"))
         except Exception as e:
@@ -129,18 +113,15 @@ def forgot_password():
 
     return render_template("forget_password.html")
 
-
-# -----------------------------
-# OTP Verification
-# -----------------------------
 @auth_bp.route("/verify-otp", methods=["GET", "POST"])
 def verify_otp():
     if request.method == "POST":
-        email = request.form["email"].strip()
+        email = session.get("reset_email")
         otp_input = request.form["otp"].strip()
 
         valid, message = verify_stored_otp(email, otp_input)
         if valid:
+            session["otp_verified"] = True
             flash("OTP verified! Please set your new password.", "success")
             return redirect(url_for("auth.reset_password"))
         else:
@@ -148,13 +129,13 @@ def verify_otp():
 
     return render_template("otp_verification.html")
 
-
-# -----------------------------
-# Reset Password
-# -----------------------------
 @auth_bp.route("/reset-password", methods=["GET", "POST"])
 def reset_password():
     if request.method == "POST":
+        if not session.get("otp_verified"):
+            flash("Please verify OTP first.", "danger")
+            return redirect(url_for("auth.forgot_password"))
+
         new_password = request.form["password"]
         confirm_password = request.form["confirm_password"]
 
@@ -173,6 +154,8 @@ def reset_password():
             user.password_hash = generate_password_hash(new_password)
             db.session.commit()
             session.pop("reset_user_id", None)
+            session.pop("reset_email", None)
+            session.pop("otp_verified", None)
             flash("Password updated successfully! Please login.", "success")
             return redirect(url_for("auth.signin"))
         except Exception as e:
@@ -182,10 +165,6 @@ def reset_password():
 
     return render_template("reset_password.html")
 
-
-# -----------------------------
-# Profile
-# -----------------------------
 @auth_bp.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
@@ -211,10 +190,6 @@ def profile():
 
     return render_template("profile.html", user=user)
 
-
-# -----------------------------
-# Logout
-# -----------------------------
 @auth_bp.route("/logout")
 @login_required
 def logout():

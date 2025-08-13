@@ -1,73 +1,61 @@
 import os
-import random
-import requests
-from flask import Flask, request, jsonify
+import secrets
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
-from cachetools import TTLCache
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
 
-# Load environment variables
 load_dotenv()
 
-app = Flask(__name__)
+# OTP in-memory store: {email: {"otp": str, "expires_at": datetime}}
+otp_cache = {}
 
-# Cache to store OTPs for a short time
-otp_cache = TTLCache(maxsize=1000, ttl=int(os.getenv("OTP_EXPIRY", 300)))
+def generate_otp(length=6):
+    """Generate a secure numeric OTP."""
+    return ''.join(secrets.choice("0123456789") for _ in range(length))
 
-# Brevo API key from .env
-BREVO_API_KEY = os.getenv("BREVO_API_KEY")
-BREVO_URL = "https://api.brevo.com/v3/smtp/email"
+def store_otp(email, otp):
+    """Store OTP with expiry."""
+    expiry_time = datetime.utcnow() + timedelta(minutes=int(os.getenv("OTP_EXPIRY_MINUTES", 5)))
+    otp_cache[email] = {"otp": otp, "expires_at": expiry_time}
 
-# Generate random OTP
-def generate_otp():
-    return str(random.randint(100000, 999999))
+def verify_stored_otp(email, otp_input):
+    """Verify OTP and remove it if valid."""
+    if email not in otp_cache:
+        return False, "No OTP found or expired."
 
-# Send OTP Email via Brevo
-def send_email_otp(email, otp):
-    headers = {
-        "accept": "application/json",
-        "api-key": BREVO_API_KEY,
-        "content-type": "application/json"
-    }
-    payload = {
-        "sender": {"name": "YourAppName", "email": "your_verified_email@example.com"},
-        "to": [{"email": email}],
-        "subject": "Your OTP Code",
-        "htmlContent": f"<h3>Your OTP is <b>{otp}</b></h3><p>This code will expire in 5 minutes.</p>"
-    }
-    response = requests.post(BREVO_URL, headers=headers, json=payload)
-    return response.status_code, response.text
+    record = otp_cache[email]
+    if datetime.utcnow() > record["expires_at"]:
+        del otp_cache[email]
+        return False, "OTP expired."
 
-# Request OTP route
-@app.route("/send-otp", methods=["POST"])
-def send_otp():
-    email = request.json.get("email")
-    if not email:
-        return jsonify({"error": "Email is required"}), 400
+    if record["otp"] != otp_input:
+        return False, "Invalid OTP."
 
+    del otp_cache[email]
+    return True, "OTP verified."
+
+def initiate_email_otp_flow(email):
+    """Generate OTP, store it, and send via Brevo email."""
     otp = generate_otp()
-    otp_cache[email] = otp  # Store OTP in cache
+    store_otp(email, otp)
 
-    status, msg = send_email_otp(email, otp)
-    if status == 201:
-        return jsonify({"message": "OTP sent successfully"}), 200
-    else:
-        return jsonify({"error": "Failed to send OTP", "details": msg}), 500
+    configuration = sib_api_v3_sdk.Configuration()
+    configuration.api_key['api-key'] = os.getenv("BREVO_API_KEY")
 
-# Verify OTP route
-@app.route("/verify-otp", methods=["POST"])
-def verify_otp():
-    email = request.json.get("email")
-    otp = request.json.get("otp")
+    sender_email = os.getenv("BREVO_SENDER_EMAIL")
+    subject = "Your Password Reset OTP"
+    content = f"Your OTP is: {otp}\nIt expires in {os.getenv('OTP_EXPIRY_MINUTES', 5)} minutes."
 
-    if not email or not otp:
-        return jsonify({"error": "Email and OTP are required"}), 400
+    api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+    send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+        to=[{"email": email}],
+        sender={"email": sender_email},
+        subject=subject,
+        text_content=content
+    )
 
-    stored_otp = otp_cache.get(email)
-    if stored_otp and stored_otp == otp:
-        del otp_cache[email]  # Remove OTP after successful verification
-        return jsonify({"message": "OTP verified successfully"}), 200
-    else:
-        return jsonify({"error": "Invalid or expired OTP"}), 400
-
-if __name__ == "__main__":
-    app.run(debug=True)
+    try:
+        api_instance.send_transac_email(send_smtp_email)
+    except ApiException as e:
+        raise Exception(f"Failed to send OTP email: {e}")
