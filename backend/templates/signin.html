@@ -67,7 +67,7 @@
           {% endfor %}
         {% endif %}
       {% endwith %}
-      <form method="POST" action="{{ url_for('auth.login') }}">
+      <form method="POST" action="{{ url_for('auth.signin') }}">
         <div class="mb-3">
           <input type="text" class="form-control" name="username_or_email" placeholder="Username or Email" required>
         </div>
