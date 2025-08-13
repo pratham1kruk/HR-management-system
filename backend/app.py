@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, url_for, redirect, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_pymongo import PyMongo
 from flask_cors import CORS
@@ -60,8 +60,14 @@ from utils.decorator import login_required
 # -----------------------------
 @app.route("/")
 @login_required
+@app.route("/")
 def home():
-    return render_template("index.html")
+    # If user is logged in → main page
+    if session.get("user_id"):
+        return render_template("index.html")
+    # If not logged in → landing page
+    return redirect(url_for("auth.auth_home"))
+
 
 # -----------------------------
 # Optional: Create tables on first run
