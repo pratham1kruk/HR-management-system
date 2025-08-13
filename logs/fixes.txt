@@ -66,3 +66,5 @@ session 4 starts
 checkpoint 14 
 
 ckp 14a
+
+ckp 14b
