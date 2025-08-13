@@ -16,7 +16,7 @@ services:
       - postgres
       - mongo
     restart: always
-    command: gunicorn app:app --chdir /app --bind 0.0.0.0:5000
+    command: gunicorn app:app --chdir /app --bind 0.0.0.0:5000 --workers 4
 
   postgres:
     image: cimg/postgres:17.5-postgis
@@ -32,7 +32,7 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./db_init/init_employee.sql:/docker-entrypoint-initdb.d/init_employee.sql
       - ./db_init/professional_info.sql:/docker-entrypoint-initdb.d/professional_info.sql
-      - ./db_init/professional_info.sql:/docker-entrypoint-initdb.d/accounts.sql
+      - ./db_init/accounts.sql:/docker-entrypoint-initdb.d/accounts.sql  # Fixed duplicate mapping
 
   mongo:
     image: corpusops/mongo:latest
@@ -45,7 +45,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-example}
     volumes:
       - mongo_data:/data/db
-      - ./db_init:/data/db_init  # ✅ Mount personnel_info.json for import
+      - ./db_init:/data/db_init  # Mount personnel_info.json for initial import
 
 volumes:
   pgdata:
