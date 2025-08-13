@@ -10,15 +10,16 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 ALLOWED_ROLES = ["user", "viewer", "editor"]
 
+# Landing page BEFORE login
 @auth_bp.route("/home")
-@login_required
 def auth_home():
     return render_template("auth_home.html")
 
+# Sign Up
 @auth_bp.route("/signup", methods=["GET", "POST"])
 def signup():
     if session.get("user_id"):
-        return redirect(url_for("auth.auth_home"))
+        return redirect(url_for("index"))  # if already logged in, go to main app
 
     if request.method == "POST":
         username = request.form["username"].strip()
@@ -67,10 +68,11 @@ def signup():
 
     return render_template("signup.html")
 
+# Sign In
 @auth_bp.route("/signin", methods=["GET", "POST"])
 def signin():
     if session.get("user_id"):
-        return redirect(url_for("auth.auth_home"))
+        return redirect(url_for("index"))  # Redirect to main app page if already logged in
 
     if request.method == "POST":
         username_or_email = request.form["username_or_email"].strip()
@@ -85,12 +87,13 @@ def signin():
             session["user_id"] = user.id
             session["role"] = user.role
             flash("Logged in successfully!", "success")
-            return redirect(url_for("auth.auth_home"))
+            return redirect(url_for("index"))  # Redirect to main app page
 
         flash("Invalid credentials!", "danger")
 
     return render_template("signin.html")
 
+# Forgot Password
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
@@ -113,6 +116,7 @@ def forgot_password():
 
     return render_template("forget_password.html")
 
+# Verify OTP
 @auth_bp.route("/verify-otp", methods=["GET", "POST"])
 def verify_otp():
     if request.method == "POST":
@@ -129,6 +133,7 @@ def verify_otp():
 
     return render_template("otp_verification.html")
 
+# Reset Password
 @auth_bp.route("/reset-password", methods=["GET", "POST"])
 def reset_password():
     if request.method == "POST":
@@ -165,6 +170,7 @@ def reset_password():
 
     return render_template("reset_password.html")
 
+# Profile
 @auth_bp.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
@@ -190,6 +196,7 @@ def profile():
 
     return render_template("profile.html", user=user)
 
+# Logout
 @auth_bp.route("/logout")
 @login_required
 def logout():
