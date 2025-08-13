@@ -9,3 +9,4 @@ pdfkit==1.0.0
 pytz
 Werkzeug==2.3.7
 requests
+Flask-Caching
