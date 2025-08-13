@@ -72,7 +72,7 @@ def signup():
 @auth_bp.route("/signin", methods=["GET", "POST"])
 def signin():
     if session.get("user_id"):
-        return redirect(url_for("index"))  # Redirect to main app page if already logged in
+        return redirect(url_for("home"))  # Redirect to main app page if already logged in
 
     if request.method == "POST":
         username_or_email = request.form["username_or_email"].strip()
