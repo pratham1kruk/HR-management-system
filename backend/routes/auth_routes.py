@@ -11,7 +11,7 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 ALLOWED_ROLES = ["user", "viewer", "editor"]
 
 # Landing page BEFORE login
-@auth_bp.route("/home")
+@auth_bp.route("/")
 def auth_home():
     return render_template("auth_home.html")
 
