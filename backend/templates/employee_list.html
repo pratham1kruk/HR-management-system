@@ -82,9 +82,19 @@
 
     <!-- Search Bar -->
     <div class="mb-3 card">
-            <form method="POST" action="{{ url_for('employee.download_employee_report') }}" class="d-flex align-items-center">
-                <input type="text" id="searchInput" name="search" class="form-control me-2" placeholder="🔍 Search by any field..." onkeyup="filterTable()">
-                <button type="submit" class="btn btn-outline-primary">⬇️ Download PDF</button>
+            <form method="POST" action="{{ url_for('employee.download_employee_report') }}" class="row g-2 align-items-center">
+                <div class="col-md-3">
+                    <input type="text" id="searchInput" name="search" class="form-control" placeholder="🔍 Search by any field..." onkeyup="filterTable()">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="company_name" class="form-control" placeholder="Company / Organization Name">
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="company_details" class="form-control" placeholder="Company Details (address / contact)">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary w-100">⬇️ Download PDF</button>
+                </div>
             </form>
     </div>
 

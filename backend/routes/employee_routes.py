@@ -130,6 +130,8 @@ def delete_employee(emp_id):
 @employee_bp.route("/download", methods=["POST"])
 def download_employee_report():
     search_query = request.form.get("search", "").strip()
+    company_name = request.form.get("company_name", "").strip() or "Unknown Company"
+    company_details = request.form.get("company_details", "").strip() or ""
     if search_query:
         employees = Employee.query.filter(
             (Employee.first_name.ilike(f"%{search_query}%")) |
@@ -140,10 +142,11 @@ def download_employee_report():
     else:
         employees = Employee.query.all()
 
-    # Render HTML for PDF
     html = render_template(
         "employee_report.html",
         employees=employees,
+        company_name=company_name,
+        company_details=company_details,
         generated_on=datetime.now().strftime("%Y-%m-%d"),
         generated_time=datetime.now().strftime("%H:%M:%S")
     )

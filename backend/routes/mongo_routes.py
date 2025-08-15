@@ -185,6 +185,8 @@ def add_qualification():
 @mongo_bp.route('/download', methods=['POST'])
 def download_personnel_report():
     search_query = request.form.get("search", "").strip()
+    company_name = request.form.get("company_name", "").strip() or "Unknown Company"
+    company_details = request.form.get("company_details", "").strip() or ""
     query = {}
     if search_query:
         query["$or"] = [
@@ -200,6 +202,8 @@ def download_personnel_report():
     html = render_template(
         "personnel_report.html",
         personnel=personnel,
+        company_name=company_name,
+        company_details=company_details,
         generated_on=datetime.now().strftime("%Y-%m-%d"),
         generated_time=datetime.now().strftime("%H:%M:%S")
     )
