@@ -1,6 +1,8 @@
 from flask import Blueprint, request, render_template, redirect, url_for, flash
 from models.postgres_models import db, Employee, ProfessionalInfo
 from datetime import datetime
+import pdfkit
+import shutil
 
 employee_bp = Blueprint("employee", __name__, url_prefix="/employees")
 
@@ -122,3 +124,43 @@ def delete_employee(emp_id):
     db.session.commit()
     flash("Employee and related professional info deleted.")
     return redirect(url_for("employee.list_employees"))
+
+
+# PDF download feature for employee list (with search)
+@employee_bp.route("/download", methods=["POST"])
+def download_employee_report():
+    search_query = request.form.get("search", "").strip()
+    if search_query:
+        employees = Employee.query.filter(
+            (Employee.first_name.ilike(f"%{search_query}%")) |
+            (Employee.last_name.ilike(f"%{search_query}%")) |
+            (Employee.email.ilike(f"%{search_query}%")) |
+            (Employee.phone.ilike(f"%{search_query}%"))
+        ).all()
+    else:
+        employees = Employee.query.all()
+
+    # Render HTML for PDF
+    html = render_template(
+        "employee_report.html",
+        employees=employees,
+        generated_on=datetime.now().strftime("%Y-%m-%d"),
+        generated_time=datetime.now().strftime("%H:%M:%S")
+    )
+
+    wkhtmltopdf_path = shutil.which("wkhtmltopdf")
+    if not wkhtmltopdf_path:
+        return "wkhtmltopdf not found in container", 500
+    config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
+
+    try:
+        pdf = pdfkit.from_string(html, False, configuration=config)
+    except Exception as e:
+        return f"Failed to generate PDF: {e}", 500
+
+    from flask import make_response
+    response = make_response(pdf)
+    response.headers["Content-Type"] = "application/pdf"
+    filename = f"Employee_Report_{datetime.now().strftime('%Y%m%d')}.pdf"
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    return response
