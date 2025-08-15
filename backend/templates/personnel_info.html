@@ -106,42 +106,56 @@
     </a>
 
     <div class="card-container">
-        <h2 class="mb-4 text-success">Personnel Records</h2>
-        <a href="/personnel/add" class="btn btn-success mb-3">➕ Add Personnel</a>
+            <h2 class="mb-4 text-success">Personnel Records</h2>
+            <a href="/personnel/add" class="btn btn-success mb-3">➕ Add Personnel</a>
 
-        <table class="table table-bordered table-hover table-striped">
-            <thead>
-                <tr>
-                    <th>Employee ID</th>
-                    <th>Name</th>
-                    <th>Aadhaar</th>
-                    <th>PAN</th>
-                    <th>DOB</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in personnel %}
-                <tr>
-                    <td>{{ p.employee_id }}</td>
-                    <td>{{ p.name }}</td>
-                    <td>{{ p.aadhaar }}</td>
-                    <td>{{ p.pan }}</td>
-                    <td>{{ p.dob }}</td>
-                    <td>
-                        <a href="/personnel/update/{{ p._id }}" class="btn btn-sm btn-primary">Edit</a>
-                        <a href="/personnel/delete/{{ p._id }}" class="btn btn-sm btn-danger">Delete</a>
-                        <a href="/personnel/{{ p._id }}" class="btn btn-sm btn-secondary">JSON</a>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="6" class="text-center text-muted">No personnel records found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            <!-- Search and PDF Download -->
+            <form method="POST" action="{{ url_for('mongo.download_personnel_report') }}" class="d-flex align-items-center mb-3">
+                <input type="text" id="searchInput" name="search" class="form-control me-2" placeholder="🔍 Search by any field..." onkeyup="filterTable()">
+                <button type="submit" class="btn btn-outline-primary">⬇️ Download PDF</button>
+            </form>
+
+            <table class="table table-bordered table-hover table-striped searchable-table">
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Name</th>
+                        <th>Aadhaar</th>
+                        <th>PAN</th>
+                        <th>DOB</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in personnel %}
+                    <tr>
+                        <td>{{ p.employee_id }}</td>
+                        <td>{{ p.name }}</td>
+                        <td>{{ p.aadhaar }}</td>
+                        <td>{{ p.pan }}</td>
+                        <td>{{ p.dob }}</td>
+                        <td>
+                            <a href="/personnel/update/{{ p._id }}" class="btn btn-sm btn-primary">Edit</a>
+                            <a href="/personnel/delete/{{ p._id }}" class="btn btn-sm btn-danger">Delete</a>
+                            <a href="/personnel/{{ p._id }}" class="btn btn-sm btn-secondary">JSON</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No personnel records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
     </div>
 
 </body>
+<script>
+function filterTable() {
+    const query = document.getElementById("searchInput").value.toLowerCase();
+    document.querySelectorAll(".searchable-table tbody tr").forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(query) ? "" : "none";
+    });
+}
+</script>
 </html>
