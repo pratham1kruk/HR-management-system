@@ -213,6 +213,23 @@ def profile():
 
     return render_template("profile.html", user=user)
 
+# Delete user account
+@auth_bp.route("/delete-account", methods=["POST"])
+@login_required
+def delete_account():
+    user = User.query.get(session["user_id"])
+    try:
+        db.session.delete(user)
+        db.session.commit()
+        session.clear()
+        flash("Your account has been deleted.", "info")
+        return redirect(url_for("auth.auth_home"))
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Delete Account Error: {e}")
+        flash("Failed to delete account. Try again.", "danger")
+        return redirect(url_for("auth.profile"))
+
 # -------------------------
 # Logout
 # -------------------------

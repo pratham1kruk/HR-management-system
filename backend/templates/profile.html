@@ -112,7 +112,11 @@
         </div>
 
         <button type="submit" class="btn btn-blue w-100">Update Profile</button>
-        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light w-100 mt-2">Logout</a>
+      </form>
+      <form method="POST" action="{{ url_for('auth.delete_account') }}" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
+        <button type="submit" class="btn btn-danger w-100 mt-2">Delete Account</button>
+      </form>
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light w-100 mt-2">Logout</a>
       </form>
     </div>
   </div>
