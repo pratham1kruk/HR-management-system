@@ -1,6 +1,10 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for
 from bson.objectid import ObjectId
 from app import mongo
+import pdfkit
+import shutil
+from flask import make_response
+from datetime import datetime
 
 mongo_bp = Blueprint('mongo', __name__, url_prefix='/personnel')
 
@@ -175,3 +179,43 @@ def add_qualification():
         return redirect(url_for('mongo.list_personnel'))
 
     return render_template("qualification.html")
+
+
+# PDF download feature for personnel info (with search)
+@mongo_bp.route('/download', methods=['POST'])
+def download_personnel_report():
+    search_query = request.form.get("search", "").strip()
+    query = {}
+    if search_query:
+        query["$or"] = [
+            {"name": {"$regex": search_query, "$options": "i"}},
+            {"employee_id": {"$regex": search_query, "$options": "i"}},
+            {"aadhaar": {"$regex": search_query, "$options": "i"}},
+            {"pan": {"$regex": search_query, "$options": "i"}},
+            {"contact.email": {"$regex": search_query, "$options": "i"}},
+            {"contact.phone": {"$regex": search_query, "$options": "i"}}
+        ]
+    personnel = list(mongo.db.employees_info.find(query))
+
+    html = render_template(
+        "personnel_report.html",
+        personnel=personnel,
+        generated_on=datetime.now().strftime("%Y-%m-%d"),
+        generated_time=datetime.now().strftime("%H:%M:%S")
+    )
+
+    wkhtmltopdf_path = shutil.which("wkhtmltopdf")
+    if not wkhtmltopdf_path:
+        return "wkhtmltopdf not found in container", 500
+    config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
+
+    try:
+        pdf = pdfkit.from_string(html, False, configuration=config)
+    except Exception as e:
+        return f"Failed to generate PDF: {e}", 500
+
+    response = make_response(pdf)
+    response.headers["Content-Type"] = "application/pdf"
+    filename = f"Personnel_Report_{datetime.now().strftime('%Y%m%d')}.pdf"
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    return response
