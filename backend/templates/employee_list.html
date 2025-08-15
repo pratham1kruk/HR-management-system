@@ -82,7 +82,10 @@
 
     <!-- Search Bar -->
     <div class="mb-3 card">
-        <input type="text" id="searchInput" class="form-control" placeholder="🔍 Search by any field..." onkeyup="filterTable()">
+            <form method="POST" action="{{ url_for('employee.download_employee_report') }}" class="d-flex align-items-center">
+                <input type="text" id="searchInput" name="search" class="form-control me-2" placeholder="🔍 Search by any field..." onkeyup="filterTable()">
+                <button type="submit" class="btn btn-outline-primary">⬇️ Download PDF</button>
+            </form>
     </div>
 
     <!-- Tabs -->
