@@ -75,6 +75,7 @@ with app.app_context():
 # Run the Flask App
 # -----------------------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    # For Railway, PORT is set automatically. Do not use quotes around $PORT.
-    app.run(host="0.0.0.0", port=port)
+    # Only run app.run() if not running under Gunicorn (i.e., local development)
+    port = int(os.environ.get("PORT") or os.environ.get("FLASK_RUN_PORT") or 5000)
+    host = os.environ.get("FLASK_RUN_HOST", "0.0.0.0")
+    app.run(host=host, port=port)
