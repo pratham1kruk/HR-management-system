@@ -3,9 +3,7 @@
 
 # Start all containers and initialize both databases
 up:
-	docker-compose up -d --build
-	$(MAKE) wait-for-db
-	$(MAKE) wait-for-mongo
+	docker-compose up --build
 	$(MAKE) init-db
 	$(MAKE) init-mongo
 
