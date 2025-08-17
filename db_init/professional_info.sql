@@ -1,5 +1,4 @@
 -- =============================
--- REWRITTEN professional_info.sql
 -- With updated column names and derived experience
 -- =============================
 

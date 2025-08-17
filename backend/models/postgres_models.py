@@ -15,7 +15,7 @@ class Employee(db.Model):
     phone = db.Column(db.String(20))
     hire_date = db.Column(db.Date, default=datetime.utcnow)
 
-    # One-to-one relationship with ProfessionalInfo
+    # Each employee has one professional info (one-to-one)
     professional = db.relationship(
         "ProfessionalInfo",
         backref=db.backref("employee", lazy=True),
@@ -25,7 +25,7 @@ class Employee(db.Model):
 
     @property
     def full_name(self):
-        """Return combined first and last name"""
+        """Get employee's full name"""
         return f"{self.first_name or ''} {self.last_name or ''}".strip()
 
 

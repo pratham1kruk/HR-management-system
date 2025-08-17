@@ -21,22 +21,31 @@ def list_employees():
 
 
 # NEW: Tabbed View for General + Professional Info
+# Employee home page
 @employee_bp.route("/tabbed")
 def list_employees_tabbed():
+# List all employees
     employees = Employee.query.outerjoin(ProfessionalInfo).all()
     return render_template("employee_tabbed.html", employees=employees)
+# List employees with professional info (tabbed view)
 
 
+# Add new employee (general info)
 # Add basic general info
 @employee_bp.route("/new", methods=["GET", "POST"])
+# Add professional info for an employee
 def add_employee():
     if request.method == "POST":
+# Edit employee general info
         new_emp = Employee(
             first_name=request.form["first_name"],
+# Edit professional info for an employee
             last_name=request.form["last_name"],
             dob=request.form["dob"],
+# Delete employee and related professional info
             gender=request.form["gender"],
             email=request.form["email"],
+# Download employee report as PDF (with search and company info)
             phone=request.form["phone"],
             hire_date=datetime.strptime(request.form["hire_date"], "%Y-%m-%d")
         )
