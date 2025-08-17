@@ -8,15 +8,18 @@ from datetime import datetime
 
 mongo_bp = Blueprint('mongo', __name__, url_prefix='/personnel')
 
+# Personnel home page
 @mongo_bp.route('/home')
 def personnel_home():
     return render_template('personnel_home.html')
 
+# List all personnel
 @mongo_bp.route('/')
 def list_personnel():
     personnel = list(mongo.db.employees_info.find())
     return render_template('personnel_info.html', personnel=personnel)
 
+# Add new personnel
 @mongo_bp.route('/add', methods=['GET', 'POST'])
 def add_personnel():
     if request.method == 'POST':
@@ -65,6 +68,7 @@ def add_personnel():
 
     return render_template('personnel_form.html', action="Add", data={})
 
+# Update personnel info
 @mongo_bp.route('/update/<id>', methods=['GET', 'POST'])
 def update_personnel(id):
     try:
@@ -122,6 +126,7 @@ def update_personnel(id):
 
     return render_template('personnel_form.html', action="Update", data=existing)
 
+# Delete personnel
 @mongo_bp.route('/delete/<id>', methods=['GET'])
 def delete_personnel(id):
     try:
@@ -130,6 +135,7 @@ def delete_personnel(id):
         return "Invalid ID", 400
     return redirect(url_for('mongo.list_personnel'))
 
+# View personnel details
 @mongo_bp.route('/<id>', methods=['GET'])
 def view_personnel(id):
     try:
@@ -141,6 +147,7 @@ def view_personnel(id):
     person["_id"] = str(person["_id"])
     return jsonify(person)
 
+# Blood group analytics
 @mongo_bp.route('/analytics/bloodgroup/<group>')
 def bloodgroup_employees(group):
     results = list(mongo.db.employees_info.find({"blood_group": group}))
@@ -155,6 +162,7 @@ def bloodgroup_employees(group):
     ]
     return jsonify(employees)
 
+# Add qualification for personnel
 @mongo_bp.route('/add-qualification', methods=['GET', 'POST'])
 def add_qualification():
     if request.method == 'POST':
@@ -182,6 +190,7 @@ def add_qualification():
 
 
 # PDF download feature for personnel info (with search)
+# Download personnel report as PDF (with search and company info)
 @mongo_bp.route('/download', methods=['POST'])
 def download_personnel_report():
     search_query = request.form.get("search", "").strip()

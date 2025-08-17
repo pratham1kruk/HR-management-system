@@ -136,6 +136,7 @@ def download_report():
 
     config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
 
+    # Analytics main page
     try:
         pdf = pdfkit.from_string(html, False, configuration=config)
     except Exception as e:

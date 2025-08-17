@@ -23,14 +23,14 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # ---------- Password handling ----------
+    # Password management
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    # ---------- Role checks ----------
+    # Role checks
     def is_editor(self):
         return self.role.lower() == "editor"
 

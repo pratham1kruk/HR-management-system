@@ -16,6 +16,7 @@ ALLOWED_ROLES = ["user", "viewer", "editor"]
 @auth_bp.route("/")
 def auth_home():
     # Redirect logged-in users to main page
+    # Auth home page: redirects logged-in users to main page
     if session.get("user_id"):
         return redirect(url_for("home"))
     return render_template("auth_home.html")
@@ -74,6 +75,7 @@ def signup():
             flash("Failed to create account. Try again later.", "danger")
 
     return render_template("signup.html")
+    # User registration (sign up)
 
 # -------------------------
 # Sign In
@@ -101,6 +103,7 @@ def signin():
             flash("Invalid credentials!", "danger")
 
     return render_template("signin.html")
+    # User login (sign in)
 
 # -------------------------
 # Forgot Password
@@ -126,6 +129,7 @@ def forgot_password():
             flash("Failed to send OTP. Please try again.", "danger")
 
     return render_template("forget_password.html")
+    # Password reset request (forgot password)
 
 # -------------------------
 # Verify OTP
@@ -145,6 +149,7 @@ def verify_otp():
             flash(message, "danger")
 
     return render_template("otp_verification.html")
+    # OTP verification for password reset
 
 # -------------------------
 # Reset Password
@@ -184,6 +189,7 @@ def reset_password():
             flash("Failed to update password. Try again.", "danger")
 
     return render_template("reset_password.html")
+    # Password reset
 
 # -------------------------
 # Profile
@@ -212,6 +218,7 @@ def profile():
             flash("Failed to update profile. Try again.", "danger")
 
     return render_template("profile.html", user=user)
+    # User profile management
 
 # Delete user account
 @auth_bp.route("/delete-account", methods=["POST"])
@@ -229,6 +236,7 @@ def delete_account():
         logging.error(f"Delete Account Error: {e}")
         flash("Failed to delete account. Try again.", "danger")
         return redirect(url_for("auth.profile"))
+    # Delete user account
 
 # -------------------------
 # Logout
@@ -239,3 +247,4 @@ def logout():
     session.clear()
     flash("Logged out successfully.", "info")
     return redirect(url_for("auth.auth_home"))
+    # User logout

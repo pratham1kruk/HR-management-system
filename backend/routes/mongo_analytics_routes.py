@@ -8,21 +8,20 @@ from pytz import timezone
 
 mongo_analytics_bp = Blueprint("mongo_analytics", __name__, url_prefix="/personnel/analytics")
 
-# ----------------------------
-# Helper: collect Mongo analytics
-# ----------------------------
+###########################################################
+# Helper: Collect analytics data from MongoDB collections
+###########################################################
 def _collect_mongo_stats():
     db = mongo.db
 
-    # Blood group counts
+    # Aggregate blood group counts
     blood_pipeline = [
         {"$group": {"_id": "$blood_group", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}}
     ]
     blood_data = list(db.employees_info.aggregate(blood_pipeline))
 
-    # Qualifications summary (from 'qualifications' collection or embedded; we handle both)
-    # We expect qualification documents in either a 'qualifications' collection or inside employees_info
+    # Aggregate qualifications summary (from separate collection or embedded)
     qualification_data = []
     try:
         # If there's a qualifications collection (as earlier in your routes)
@@ -33,9 +32,9 @@ def _collect_mongo_stats():
     except Exception:
         qualification_data = []
 
-    # fallback: build from employees_info if qualifications not separate
+    # Fallback: build from employees_info if qualifications not separate
     if not qualification_data:
-        # look for array fields inside employees_info
+        # Look for array fields inside employees_info
         q_pipeline = [
             {"$project": {
                 "_id": "$employee_id",
@@ -48,21 +47,21 @@ def _collect_mongo_stats():
         ]
         qualification_data = list(db.employees_info.aggregate(q_pipeline))
 
-    # City-wise distribution
+    # Aggregate city-wise employee distribution
     city_pipeline = [
         {"$group": {"_id": "$residence.city", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}}
     ]
     city_data = list(db.employees_info.aggregate(city_pipeline))
 
-    # State-wise distribution
+    # Aggregate state-wise employee distribution
     state_pipeline = [
         {"$group": {"_id": "$residence.state", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}}
     ]
     state_data = list(db.employees_info.aggregate(state_pipeline))
 
-    # Gender distribution (counts + percent)
+    # Calculate gender distribution (counts and percent)
     total_count = db.employees_info.count_documents({})
     male_count = db.employees_info.count_documents({"gender": "Male"})
     female_count = db.employees_info.count_documents({"gender": "Female"})
@@ -74,6 +73,7 @@ def _collect_mongo_stats():
         "total": total_count
     }
 
+    # Return all aggregated stats
     stats = {
         "blood_data": blood_data,
         "qualification_data": qualification_data,
@@ -83,26 +83,26 @@ def _collect_mongo_stats():
     }
     return stats
 
-# ----------------------------
-# Page: mongo stats (tabbed if you want to combine later)
-# ----------------------------
+###########################################################
+# Route: MongoDB analytics main page (shows stats)
+###########################################################
 @mongo_analytics_bp.route("/")
 def mongo_stats_home():
     stats = _collect_mongo_stats()
-    # pass to template
+    # Pass stats to template for rendering
     return render_template("mongo_stats.html", **stats)
 
 
-# ----------------------------
-# POST: download PDF report
-# ----------------------------
+###########################################################
+# Route: Download MongoDB analytics report as PDF
+###########################################################
 @mongo_analytics_bp.route("/download", methods=["POST"])
 def mongo_download_report():
-    # form data
+    # Get company info from form data
     company_name = request.form.get("company_name", "").strip() or "Unknown Company"
     company_details = request.form.get("company_details", "").strip() or ""
 
-    # 🕒 Generate Indian date and time
+    # Generate Indian date and time (IST)
     india_tz = timezone("Asia/Kolkata")
     now_ist = datetime.now(india_tz)
     generated_on = now_ist.strftime("%Y-%m-%d")
@@ -110,7 +110,7 @@ def mongo_download_report():
 
     stats = _collect_mongo_stats()
 
-    # Render report HTML
+    # Render report HTML for PDF generation
     html = render_template(
         "mongo_stats_report.html",
         company_name=company_name,
@@ -131,7 +131,7 @@ def mongo_download_report():
         flash("wkhtmltopdf not found in container. Install it or provide its path. PDF generation unavailable.", "danger")
         return redirect(url_for("mongo_analytics.mongo_stats_home"))
 
-    # Configure pdfkit
+    # Configure pdfkit for PDF generation
     config = pdfkit.configuration(wkhtmltopdf=wk_path)
     options = {
         "page-size": "A4",
@@ -151,7 +151,7 @@ def mongo_download_report():
         flash(f"Failed to generate PDF: {e}", "danger")
         return redirect(url_for("mongo_analytics.mongo_stats_home"))
 
-    # Send PDF as response
+    # Send generated PDF as response to user
     response = make_response(pdf)
     response.headers["Content-Type"] = "application/pdf"
     filename = f"Mongo_Analytics_Report_{now_ist.strftime('%Y%m%d_%H%M')}.pdf"
