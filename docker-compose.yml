@@ -45,7 +45,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-example}
     volumes:
       - mongo_data:/data/db
-      - ./db_init:/data/db_init  # Mount personnel_info.json for initial import
+      - ./db_init:/data/db_init  
 
 volumes:
   pgdata:
