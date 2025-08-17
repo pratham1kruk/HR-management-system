@@ -75,7 +75,5 @@ with app.app_context():
 # Run the Flask App
 # -----------------------------
 if __name__ == "__main__":
-    # Only run app.run() if not running under Gunicorn (i.e., local development)
-    port = int(os.environ.get("PORT") or os.environ.get("FLASK_RUN_PORT") or 5000)
-    host = os.environ.get("FLASK_RUN_HOST", "0.0.0.0")
-    app.run(host=host, port=port)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=True, host="0.0.0.0", port=port)
