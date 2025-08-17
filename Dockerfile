@@ -59,4 +59,4 @@ HEALTHCHECK CMD curl --fail http://localhost:5000/ || exit 1
 # -----------------------------
 # 8️⃣ Start Flask App with Gunicorn
 # -----------------------------
-CMD ["gunicorn", "app:app", "--chdir", "/app", "--bind", "0.0.0.0:5000", "--workers", "4"]
+CMD ["gunicorn", "app:app", "--chdir", "/app", "--bind", "0.0.0.0:$PORT", "--workers", "4"]
