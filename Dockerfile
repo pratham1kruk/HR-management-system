@@ -54,9 +54,11 @@ COPY db_init/ ./db_init
 # -----------------------------
 # 7️⃣ Healthcheck
 # -----------------------------
-HEALTHCHECK CMD curl --fail http://localhost:5000/ || exit 1
+# Uses $PORT if available (Railway), defaults to 5000 locally
+HEALTHCHECK CMD curl --fail http://localhost:${PORT:-5000}/ || exit 1
 
 # -----------------------------
 # 8️⃣ Start Flask App with Gunicorn
 # -----------------------------
-CMD ["gunicorn", "app:app", "--chdir", "/app", "--bind", "0.0.0.0:5000", "--workers", "4"]
+# Use shell form so ${PORT} expands correctly
+CMD ["sh", "-c", "gunicorn app:app --chdir /app --bind 0.0.0.0:${PORT:-5000} --workers 4"]
