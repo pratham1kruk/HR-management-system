@@ -50,9 +50,11 @@ HR.mngr/
 ├── backup/
 │   ├── hrdb_schema_backup.sql
 │   └── mongo_backup.md
+├──logs/
 ├── Dockerfile
 ├── docker-compose.yml
 ├── Makefile
+├── Makefile.md
 ├── Procfile
 ├── .env.example
 └── README.md
@@ -63,23 +65,32 @@ HR.mngr/
 ## Environment Variables (.env)
 Create a `.env` file in the root directory. Example:
 ```
-# PostgreSQL
-POSTGRES_USER=your_pg_user
-POSTGRES_PASSWORD=your_pg_password
-POSTGRES_DB=your_pg_db
+# Postgres
+POSTGRES_USER=hradmin
+POSTGRES_PASSWORD=secret123
+POSTGRES_DB=hrdb
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
 
-# MongoDB
-MONGO_USER=your_mongo_user
-MONGO_PASSWORD=your_mongo_password
-MONGO_DBNAME=your_mongo_db
+# Mongo
+MONGO_USER=root
+MONGO_PASSWORD=example
+MONGO_DBNAME=hrmongo
+MONGO_HOST=localhost
+MONGO_PORT=27017
 
 # Flask
-FLASK_ENV=production
-SECRET_KEY=your_secret_key
+FLASK_ENV=development
+FLASK_APP=app.py
+FLASK_RUN_HOST=0.0.0.0
+FLASK_RUN_PORT=5000
 
-# Brevo (Sendinblue)
-BREVO_API_KEY=your_brevo_api_key
-BREVO_EMAIL=your_email@example.com
+# Others
+OTP_EXPIRY_MINUTES=5
+BREVO_API_KEY=your-brevo-api-key
+BREVO_SENDER_EMAIL=your-brevo-sender-email
+SECRET_KEY=local-secret
+
 ```
 - **BREVO_API_KEY**: Get from Brevo dashboard
 - **BREVO_EMAIL**: Sender email for notifications/OTP
@@ -130,10 +141,11 @@ If lost, you’ll need to generate a new one.
 ## How to Run (Docker Compose)
 1. Build and start all services:
    ```
-   make up **only once at start**
-   docker-compose up --build **after make up next time always use this**
+   make up 
+   docker-compose up --build \
    
    ```
+   use make command only once then on use docker compose up --build
 2. Access the app at `http://localhost:5000`
 3. PostgreSQL and MongoDB run in containers, preconfigured for the app
 4. To reset the database, use SQL files in `db_init` or run the backup scripts
