@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.9"
 
 services:
   web:
@@ -10,16 +10,18 @@ services:
       - "5000:5000"
     env_file:
       - .env
+    environment:
+      FLASK_ENV: development   # 👈 forces local mode
     volumes:
       - ./backend:/app
     depends_on:
       - postgres
       - mongo
     restart: always
-    command: gunicorn app:app --chdir /app --bind 0.0.0.0:5000 --workers 4
+    command: sh -c "gunicorn app:app --chdir /app --bind 0.0.0.0:${PORT:-5000} --workers 4"
 
   postgres:
-    image: cimg/postgres:17.5-postgis
+    image: postgres:15
     container_name: hr_postgres
     restart: always
     environment:
@@ -35,7 +37,7 @@ services:
       - ./db_init/accounts.sql:/docker-entrypoint-initdb.d/accounts.sql
 
   mongo:
-    image: corpusops/mongo:latest
+    image: mongo:6
     container_name: hr_mongo
     restart: always
     ports:
@@ -45,7 +47,6 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-example}
     volumes:
       - mongo_data:/data/db
-      - ./db_init:/data/db_init  
 
 volumes:
   pgdata:
