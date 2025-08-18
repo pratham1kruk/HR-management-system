@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS accounts (
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    role VARCHAR(10) NOT NULL CHECK (role IN ('Editor', 'Viewer')),
+    role VARCHAR(10) NOT NULL CHECK (role IN ('editor', 'viewer')),
     first_name VARCHAR(50),
     last_name VARCHAR(50),
     job_title VARCHAR(100),
