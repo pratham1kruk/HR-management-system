@@ -89,9 +89,12 @@ jobs:
       - name: Check Web App Health
         run: |
           for i in {1..5}; do
-            curl -s http://localhost:5000/ && exit 0
-            echo "Retrying web service..."
-            sleep 5
+            if curl -s http://localhost:5000/ > /dev/null; then
+              echo "✅ Web app is healthy"
+              exit 0
+            fi
+            echo "Retrying web service... attempt $i"
+            sleep 10
           done
           echo "❌ Web app failed to respond" && exit 1
 
