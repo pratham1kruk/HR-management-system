@@ -29,7 +29,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret123}
       POSTGRES_DB: ${POSTGRES_DB:-hrdb}
     ports:
-      - "6544:5432"
+      - "6543:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db_init/init_employee.sql:/docker-entrypoint-initdb.d/init_employee.sql
@@ -41,7 +41,7 @@ services:
     container_name: hr_mongo
     restart: always
     ports:
-      - "27018:27017"
+      - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-root}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-example}
