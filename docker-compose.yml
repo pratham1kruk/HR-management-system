@@ -11,7 +11,7 @@ services:
     env_file:
       - .env
     environment:
-      FLASK_ENV: development   # 👈 forces local mode
+      FLASK_ENV: development   
     volumes:
       - ./backend:/app
     depends_on:
