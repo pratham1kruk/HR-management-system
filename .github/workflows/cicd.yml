@@ -86,6 +86,10 @@ jobs:
       - name: Check MongoDB
         run: |
           docker exec hr_mongo mongosh -u root -p example --eval "db.stats()" || (echo "❌ MongoDB failed" && exit 1)
+      - name: Debug Web Container
+        run: |
+          docker ps -a
+          docker logs hr_flask_web || true
 
       - name: Check Web App Health
         run: |
