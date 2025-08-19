@@ -28,11 +28,11 @@ jobs:
 
       mongo:
         image: mongo:6
+        ports:
+          - 27017:27017
         env:
           MONGO_INITDB_ROOT_USERNAME: root
           MONGO_INITDB_ROOT_PASSWORD: example
-        ports:
-          - 27017:27017
         options: >-
           --health-cmd="mongosh --eval 'db.runCommand({ ping: 1 })'"
           --health-interval=10s
@@ -40,50 +40,47 @@ jobs:
           --health-retries=5
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Set up Docker Compose
         run: docker compose version
 
-      - name: Build and Start Containers
+      - name: Build and Start Services
         run: |
           docker compose -f docker-compose.yml up --build -d
-          echo "Waiting for services to stabilize..."
+          echo "Waiting for services to be healthy..."
           sleep 20
 
       - name: Check PostgreSQL
-        run: |
-          docker exec hr_postgres pg_isready -U hradmin -d hrdb || (echo "❌ PostgreSQL failed" && exit 1)
+        run: docker exec hr_postgres pg_isready -U hradmin -d hrdb || (echo "❌ PostgreSQL failed" && exit 1)
 
       - name: Check MongoDB
-        run: |
-          docker exec hr_mongo mongosh -u root -p example --eval "db.runCommand({ ping: 1 })" || (echo "❌ MongoDB failed" && exit 1)
+        run: docker exec hr_mongo mongosh -u root -p example --eval "db.stats()" || (echo "❌ MongoDB failed" && exit 1)
 
-      - name: Check Web App
+      - name: Check Web App Health
         run: |
           for i in {1..5}; do
-            if curl -s http://localhost:5000/ > /dev/null; then
-              echo "✅ Web app is healthy"
-              exit 0
-            fi
-            echo "Retrying web app health check ($i/5)..."
+            curl -s http://localhost:5000/ && exit 0
+            echo "Retrying web service..."
             sleep 5
           done
           echo "❌ Web app failed to respond" && exit 1
 
       - name: Run Tests
-        run: |
-          docker exec hr_flask_web pytest || (echo "❌ Tests failed" && exit 1)
+        run: docker exec hr_flask_web pytest || (echo "❌ Web app tests failed" && exit 1)
 
-    deploy:
+  deploy:
     runs-on: ubuntu-latest
     needs: build-and-test
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Deploy to Railway (Production)
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway (Main)
         if: github.ref == 'refs/heads/main'
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
