@@ -112,9 +112,11 @@ jobs:
 
       - name: Run Tests
         run: |
-          # If your tests require the repo files, copy the repo as well
+          # Copy the whole repo into container
           docker cp . hr_flask_web:/tmp/app
+          # Run pytest on the tests folder
           docker exec hr_flask_web pytest /tmp/app/tests || (echo "❌ Web app tests failed" && exit 1)
+
 
   deploy:
     runs-on: ubuntu-latest
