@@ -19,7 +19,7 @@ jobs:
           POSTGRES_PASSWORD: secret123
           POSTGRES_DB: hrdb
         ports:
-          - 6543:5432
+          - 6544:5432
         options: >-
           --health-cmd="pg_isready -U hradmin -d hrdb"
           --health-interval=10s
@@ -29,7 +29,7 @@ jobs:
       mongo:
         image: mongo:6
         ports:
-          - 27017:27017
+          - 27018:27017
         env:
           MONGO_INITDB_ROOT_USERNAME: root
           MONGO_INITDB_ROOT_PASSWORD: example
@@ -50,13 +50,13 @@ jobs:
           POSTGRES_PASSWORD=secret123
           POSTGRES_DB=hrdb
           POSTGRES_HOST=localhost
-          POSTGRES_PORT=5432
+          POSTGRES_PORT=6544
 
           MONGO_USER=root
           MONGO_PASSWORD=example
           MONGO_DBNAME=hrmongo
           MONGO_HOST=localhost
-          MONGO_PORT=27017
+          MONGO_PORT=27018
 
           FLASK_ENV=development
           FLASK_APP=app.py
@@ -95,9 +95,11 @@ jobs:
           done
           echo "❌ Web app failed to respond" && exit 1
 
+      - name: Install dev dependencies
+        run: docker exec hr_flask_web pip install -r requirements-dev.txt
+
       - name: Run Tests
-        run: |
-          docker exec hr_flask_web pytest || (echo "❌ Web app tests failed" && exit 1)
+        run: docker exec hr_flask_web pytest || (echo "❌ Web app tests failed" && exit 1)
 
   deploy:
     runs-on: ubuntu-latest
