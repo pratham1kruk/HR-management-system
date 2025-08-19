@@ -103,11 +103,18 @@ jobs:
           done
           echo "❌ Web app failed to respond" && exit 1
 
-      - name: Install dev dependencies
-        run: docker exec hr_flask_web pip install -r requirements-dev.txt
+      - name: Install dev dependencies (CI only)
+        run: |
+          # Copy requirements-dev.txt into container temporarily
+          docker cp requirements-dev.txt hr_flask_web:/tmp/requirements-dev.txt
+          # Install dev dependencies
+          docker exec hr_flask_web pip install -r /tmp/requirements-dev.txt
 
       - name: Run Tests
-        run: docker exec hr_flask_web pytest || (echo "❌ Web app tests failed" && exit 1)
+        run: |
+          # If your tests require the repo files, copy the repo as well
+          docker cp . hr_flask_web:/tmp/app
+          docker exec hr_flask_web pytest /tmp/app/tests || (echo "❌ Web app tests failed" && exit 1)
 
   deploy:
     runs-on: ubuntu-latest
