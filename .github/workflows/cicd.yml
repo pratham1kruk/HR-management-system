@@ -120,7 +120,8 @@ jobs:
       - name: Install Railway CLI
         run: |
           curl -sSL https://railway.app/install.sh | sh
-          export PATH=$PATH:$HOME/.railway/bin
+          echo "$HOME/.railway/bin" >> $GITHUB_PATH
+
 
 
   deploy:
