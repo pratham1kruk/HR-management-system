@@ -116,6 +116,11 @@ jobs:
           docker cp . hr_flask_web:/tmp/app
           # Run pytest on the tests folder
           docker exec hr_flask_web pytest /tmp/app/tests || (echo "❌ Web app tests failed" && exit 1)
+      
+      - name: Install Railway CLI
+        run: |
+          curl -sSL https://railway.app/install.sh | sh
+          export PATH=$PATH:$HOME/.railway/bin
 
 
   deploy:
