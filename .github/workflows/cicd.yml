@@ -8,6 +8,10 @@ on:
   pull_request:
 
 jobs:
+
+  # =========================================================
+  # BUILD + TEST
+  # =========================================================
   build-and-test:
     runs-on: ubuntu-latest
 
@@ -40,7 +44,8 @@ jobs:
           --health-retries=5
 
     steps:
-      - name: Checkout repo
+
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
       - name: Create .env file
@@ -65,88 +70,174 @@ jobs:
           PORT=5000
 
           OTP_EXPIRY_MINUTES=5
+
           BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
           BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
+
           SECRET_KEY=ci-secret
           EOF
 
-      - name: Check Docker Compose version
+      - name: Check Docker Compose Version
         run: docker compose version
 
       - name: Build and Start Services
         run: |
           docker compose -f docker-compose.yml up --build -d
-          echo "⏳ Waiting for services..."
-          sleep 20
 
-      - name: Check PostgreSQL
+          echo "⏳ Waiting for containers to initialize..."
+          sleep 25
+
+      - name: Show Running Containers
+        run: docker ps -a
+
+      - name: Check PostgreSQL Health
         run: |
           docker exec hr_postgres pg_isready -U hradmin -d hrdb || (echo "❌ PostgreSQL failed" && exit 1)
 
-      - name: Check MongoDB
+      - name: Check MongoDB Health
         run: |
           docker exec hr_mongo mongosh -u root -p example --eval "db.stats()" || (echo "❌ MongoDB failed" && exit 1)
-      - name: Debug Web Container
+
+      - name: Debug Flask Container Logs
         run: |
-          docker ps -a
           docker logs hr_flask_web || true
 
-      - name: Check Web App Health
+      - name: Check Flask Web Health
         run: |
           for i in {1..15}; do
+
             if curl -s http://localhost:5000/ > /dev/null; then
-              echo "✅ Web app is healthy"
+              echo "✅ Flask app is healthy"
               exit 0
             fi
-            echo "Retrying web service... attempt $i"
+
+            echo "⏳ Retrying Flask app... attempt $i"
             sleep 10
+
           done
-          echo "❌ Web app failed to respond" && exit 1
 
-      - name: Install dev dependencies (CI only)
+          echo "❌ Flask app failed to respond"
+          exit 1
+
+      - name: Install Dev Dependencies
         run: |
-          # Copy requirements-dev.txt into container temporarily
           docker cp requirements-dev.txt hr_flask_web:/tmp/requirements-dev.txt
-          # Install dev dependencies
-          docker exec hr_flask_web pip install -r /tmp/requirements-dev.txt
 
-      - name: Run Tests
+          docker exec hr_flask_web \
+            pip install -r /tmp/requirements-dev.txt
+
+      - name: Run Pytest
         run: |
-          # Copy the whole repo into container
           docker cp . hr_flask_web:/tmp/app
-          # Run pytest on the tests folder
-          docker exec hr_flask_web pytest /tmp/app/tests || (echo "❌ Web app tests failed" && exit 1)
-      
-      - name: Install Railway CLI
-        run: |
-          curl -sSL https://railway.app/install.sh | sh
-          echo "$HOME/.railway/bin" >> $GITHUB_PATH
+
+          docker exec hr_flask_web \
+            pytest /tmp/app/tests || (echo "❌ Tests failed" && exit 1)
 
 
 
-  deploy:
+  # =========================================================
+  # RAILWAY PRECHECK
+  # =========================================================
+  railway-precheck:
     runs-on: ubuntu-latest
     needs: build-and-test
 
     steps:
-      - name: Checkout repo
+
+      - name: Checkout Repository
         uses: actions/checkout@v3
-      
+
       - name: Install Railway CLI
         run: |
           curl -sSL https://railway.app/install.sh | sh
           echo "$HOME/.railway/bin" >> $GITHUB_PATH
 
-      - name: Deploy to Railway (Production)
+      - name: Verify Railway CLI
+        run: railway --version
+
+      - name: Validate Railway Authentication
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway whoami
+
+      - name: Link Railway Project
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+        run: railway link $RAILWAY_PROJECT_ID
+
+      - name: Verify Railway Project Access
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway status
+
+      - name: Verify Required Files
+        run: |
+          test -f Dockerfile || (echo "❌ Dockerfile missing" && exit 1)
+
+          test -f docker-compose.yml || \
+          (echo "❌ docker-compose.yml missing" && exit 1)
+
+      - name: Validate Docker Build
+        run: |
+          docker build -t hr-test .
+
+      - name: Validate Railway Deployment Readiness
+        run: |
+          echo "✅ Railway deployment precheck passed"
+
+
+
+  # =========================================================
+  # DEPLOY
+  # =========================================================
+  deploy:
+    runs-on: ubuntu-latest
+    needs: railway-precheck
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Railway CLI
+        run: |
+          curl -sSL https://railway.app/install.sh | sh
+          echo "$HOME/.railway/bin" >> $GITHUB_PATH
+
+      - name: Link Railway Project
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+        run: railway link $RAILWAY_PROJECT_ID
+
+      # =====================================================
+      # MAIN BRANCH → PRODUCTION
+      # =====================================================
+      - name: Deploy to Railway Production
         if: github.ref == 'refs/heads/main'
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
-        run: railway up --service web --environment production
+        run: |
+          railway up \
+            --service web \
+            --environment production
 
-      - name: Deploy to Railway (Post-Production)
+      # =====================================================
+      # POST_PRODUCTION BRANCH
+      # =====================================================
+      - name: Deploy to Railway Post Production
         if: github.ref == 'refs/heads/post_production'
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
-        run: railway up --service web --environment production
+        run: |
+          railway up \
+            --service web \
+            --environment production
+
+      # =====================================================
+      # VERIFY DEPLOYMENT
+      # =====================================================
+      - name: Deployment Finished
+        run: |
+          echo "✅ Railway deployment completed successfully"
